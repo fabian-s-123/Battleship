@@ -9,7 +9,7 @@ public class Field {
     private FieldRenderState fieldRenderState;
     private Ship ship;
 
-    public Field(String fieldName, int posX, int posy, FieldRenderState fieldRenderState, Ship ship) {
+    public Field(String fieldName, FieldRenderState fieldRenderState, Ship ship) {
         this.fieldName = fieldName;
         this.fieldRenderState = fieldRenderState;
         this.ship = ship;
