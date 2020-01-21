@@ -5,9 +5,6 @@ import at.battleship.components.Playground;
 
 public class Renderer {
 
-    private String column;
-    private String row;
-
     public Renderer(Playground playgroundPlayer1, Playground playgroundPlayer2, Player player1, Player player2) {
         this.draw(playgroundPlayer1, player1);
         this.draw(playgroundPlayer2, player2);
@@ -33,21 +30,37 @@ public class Renderer {
     }*/
 
     public void draw(Playground playground, Player player) {
+        renderPlayerInformation(player);
         System.out.println(renderPlayground(playground, player));
     }
 
+    private void renderPlayerInformation(Player player) {
+        System.out.println("\n   " + player.getName() + "  -  current score: " + player.getScore() + "\n");
+    }
+
     private String renderPlayground(Playground playground, Player player) {
-        System.out.println("\n   " + player.getName() + "\n");
-        System.out.println("     A   B   C   D   E   F   G   H   I   J ");
+        int column = 65;
+        for (int a = 0; a < playground.getMap().length; a++) {
+            char columnLabel = (char) column;
+            if (a == 0) {
+                System.out.printf("     %1c ", columnLabel);
+                column++;
+            } else {
+                System.out.printf("  %1c ", columnLabel);
+                column++;
+            }
+        }
+        System.out.println("");
+
         StringBuilder sb = new StringBuilder();
         sb.append(renderTop(playground));
         int row = 1;
         for (int y = 0; y < playground.getMap().length; y++) {
             for (int x = 0; x < playground.getMap().length; x++) {
                 if (x == 0) {
-                    if (row == 10) {
+                    if (row == playground.getMap().length) {
                         sb.append(row).append(" ");
-                    } else if (row < 10) {
+                    } else if (row < playground.getMap().length) {
                         sb.append(row).append("  ");
                         row++;
                     }
@@ -63,6 +76,7 @@ public class Renderer {
         return sb.toString();
     }
 
+
     private String renderTop(Playground playground) {
         StringBuilder sb = new StringBuilder();
         sb.append("   \u250C\u2500");
@@ -73,6 +87,7 @@ public class Renderer {
         return sb.toString();
     }
 
+
     private String renderBottom(Playground playground) {
         StringBuilder sb = new StringBuilder();
         sb.append("   \u2514\u2500");
@@ -82,6 +97,7 @@ public class Renderer {
         sb.append("\u2500\u2500\u2518\n");
         return sb.toString();
     }
+
 
     private String renderLine(Playground playground) {
         StringBuilder sb = new StringBuilder();
