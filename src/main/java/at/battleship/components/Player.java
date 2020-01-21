@@ -22,7 +22,7 @@ public class Player {
         this.name = name;
     }
 
-    public boolean isPlayerTurn() {
+    public boolean getPlayerTurn() {
         return playerTurn;
     }
 

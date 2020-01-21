@@ -1,6 +1,5 @@
 package at.battleship.components;
 
-import at.battleship.services.Renderer;
 import at.battleship.ships.*;
 
 import java.util.ArrayList;
@@ -11,23 +10,23 @@ import java.util.regex.Pattern;
 public class Game {
 
     private boolean isPlaying = true;
-    private Player player1;
-    private Player player2;
-    private boolean turnPlayer1;
-    private boolean turnPlayer2;
-    private Scanner sc = new Scanner(System.in);
-    private String inputPlayer1 = "";
-    private String inputPlayer2 = "";
-    private boolean validInput;
+    private Player[] players = new Player[2];
+
+
     private int currentHitPointsPlayer1 = 30;
     private int currentHitPointsPlayer2 = 30;
 
     private static final Pattern SHIP_POSITION_PATTERN = Pattern.compile("^([a-jA-J]+[1-9]|10)$");
 
     public void play() {
-        player1 = new Player("Fabian", false, true, 0);
-        player2 = new Player("Captain AngryMan", false, false, 0);
-        this.setBattlefield(player1, player2);
+        /*player1 = new Player("Fabian", false, true, 0);
+        player2 = new Player("Captain AngryMan", false, false, 0);*/
+
+        this.playIntro();
+        if (players[0] != null && players[1] != null) {
+            this.setBattlefield(this.players[0], this.players[1]);
+            this.play_TEST();
+        }
     }
 
 
@@ -41,12 +40,12 @@ public class Game {
         this.addShipsToThePlayground(shipsPlayer1, playgroundPlayer1);
         this.addShipsToThePlayground(shipsPlayer2, playgroundPlayer2);
 
-        Renderer renderer = new Renderer(playgroundPlayer1, playgroundPlayer2, player1, player2);
+        //Renderer renderer = new Renderer(playgroundPlayer1, playgroundPlayer2, player1, player2);
     }
 
     public ArrayList<Ship> setShipsPlayer1(Player player1) {
         ArrayList<Ship> ships = new ArrayList<>();
-        Carrier carrier = new Carrier(player1,8, 8, 3, 7);
+        Carrier carrier = new Carrier(player1, 8, 8, 3, 7);
         ships.add(carrier);
 
         Battleship battleship1 = new Battleship(player1, 3, 6, 0, 0);
@@ -119,30 +118,51 @@ public class Game {
         }
     }
 
-/*    public void play() {
-        this.createBotOpponent();
+    public void playIntro() {
+        Scanner sc = new Scanner(System.in);
         System.out.println("Welcome to Battleships\nPlease enter your name:");
+        boolean validName = false;
+        while (validName) {
+            //validate name input
+        }
+        String player1Name = sc.nextLine();
+        Player player1 = new Player(sc.nextLine(), true, true, 0);
+        this.players[0] = player1;
+        Player player2 = createBotOpponent();
+        this.players[1] = player2;
+    }
+
+
+    public void play_TEST() {
+        Scanner sc = new Scanner(System.in);
+
+        //win condition: if score of player hits number of all ship tiles combined (in this case 30)
+
+
         while (isPlaying) {
-            this.player1.setName(sc.nextLine());
-            System.out.println("Set Your Ships: you have 1 Carrier (5x1), 2 Battleships (4x1), 3 Destroyer (3x1) & 4 Submarines (2x1)");
-            boolean settingShips = true;
             boolean validInput = true;
-            while (settingShips && validInput) {
+
+            while (players[0].getPlayerTurn()) {
+                String[] playerInput = {sc.nextLine()};
+                System.out.println(playerInput[0]);
+            }
+
+            //System.out.println("Set Your Ships: you have 1 Carrier (5x1), 2 Battleships (4x1), 3 Destroyer (3x1) & 4 Submarines (2x1)");
+            //boolean settingShips = true;
+/*            while (settingShips && validInput) {
                 System.out.println("First, set the starting point of your Ships, starting in the same order as seen above.");
                 System.out.println("You can set them in the range from 'A-J' and from '1-10', for example: C4");
                 inputPlayer1 = sc.nextLine();
                 if (checkInput(inputPlayer1)) {
                     playgroundPlayer1.setShipStartingPoint(inputPlayer1);
-
                 } else {
                     System.out.println("Incorrect input.");
                 }
-                System.out.println("Next, set the direction of your Ship: user 'up', 'down', 'right' & 'left' for direction");
-            }
-        }
-        this.setShips();
+                System.out.println("Next, set the direction of your Ship: user 'up', 'down', 'right' & 'left' for direction");*/
 
-    }*/
+
+        }
+    }
 
 
     private static boolean checkInput(String input) {
@@ -150,12 +170,28 @@ public class Game {
         return matcher.matches();
     }
 
+    private int validateX(String xAsString) {
+        char xAsChar = xAsString.charAt(0);
+        int x = (int) xAsChar - 65;
+        if (x >= 0 && x <= 10) {
+            return x;
+        }
+        return -1;
+    }
+
+    private int validateY(String yAsString) {
+        int y = Integer.parseInt(yAsString);
+        if (y >= 0 && y <= 10) {
+            return y;
+        }
+        return -1;
+    }
+
     private void setShips() {
     }
 
-    private void createBotOpponent() {
-        this.player2.setName("Captain AngryMan");
-        this.player2.setPlayerTurn(false);
+    private Player createBotOpponent() {
+        return new Player("Captain AngryMan", false, false, 0);
     }
 
     private String simulateOpponent() {
