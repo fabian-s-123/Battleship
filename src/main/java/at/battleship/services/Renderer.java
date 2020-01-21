@@ -5,6 +5,9 @@ import at.battleship.components.Playground;
 
 public class Renderer {
 
+    private String column;
+    private String row;
+
     public Renderer(Playground playgroundPlayer1, Playground playgroundPlayer2, Player player1, Player player2) {
         this.draw(playgroundPlayer1, player1);
         this.draw(playgroundPlayer2, player2);
@@ -34,12 +37,22 @@ public class Renderer {
     }
 
     private String renderPlayground(Playground playground, Player player) {
-        System.out.println(player.getName()+"\n");
+        System.out.println("\n   " + player.getName() + "\n");
+        System.out.println("     A   B   C   D   E   F   G   H   I   J ");
         StringBuilder sb = new StringBuilder();
         sb.append(renderTop(playground));
+        int row = 1;
         for (int y = 0; y < playground.getMap().length; y++) {
             for (int x = 0; x < playground.getMap().length; x++) {
-                sb.append("\u2502").append(playground.getMap()[x][y].displayCurrentState());
+                if (x == 0) {
+                    if (row == 10) {
+                        sb.append(row).append(" ");
+                    } else if (row < 10) {
+                        sb.append(row).append("  ");
+                        row++;
+                    }
+                }
+                sb.append("\u2502").append(playground.getMap()[x][y].displayCurrentState(player.isVisible()));
             }
             sb.append("\u2502\n");
             if (playground.getMap().length - 1 != y) {
@@ -52,31 +65,31 @@ public class Renderer {
 
     private String renderTop(Playground playground) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\u250C");
+        sb.append("   \u250C\u2500");
         for (int i = 0; i < playground.getMap().length - 1; i++) {
-            sb.append("\u2500\u2500");
+            sb.append("\u2500\u2500\u2500\u2500");
         }
-        sb.append("\u2500\u2510\n");
+        sb.append("\u2500\u2500\u2510\n");
         return sb.toString();
     }
 
     private String renderBottom(Playground playground) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\u2514");
+        sb.append("   \u2514\u2500");
         for (int i = 0; i < playground.getMap().length - 1; i++) {
-            sb.append("\u2500\u2500");
+            sb.append("\u2500\u2500\u2500\u2500");
         }
-        sb.append("\u2500\u2518\n");
+        sb.append("\u2500\u2500\u2518\n");
         return sb.toString();
     }
 
     private String renderLine(Playground playground) {
         StringBuilder sb = new StringBuilder();
-        sb.append("\u2502");
+        sb.append("   \u2502\u2500");
         for (int i = 0; i < playground.getMap().length - 1; i++) {
-            sb.append("\u2500\u2500");
+            sb.append("\u2500\u2500\u2500\u2500");
         }
-        sb.append("\u2500\u2502\n");
+        sb.append("\u2500\u2500\u2502\n");
         return sb.toString();
     }
 }

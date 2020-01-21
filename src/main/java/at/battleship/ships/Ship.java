@@ -19,20 +19,20 @@ public abstract class Ship {
         this.endRangeX = endRangeX;
         this.startRangeY = startRangeY;
         this.endRangeY = endRangeY;
-        this.setPosition(startRangeX, endRangeX, startRangeY, endRangeY);
+        //this.setPosition(startRangeX, endRangeX, startRangeY, endRangeY);
     }
 
-    protected void setPosition(int startRangeX, int endRangeX, int startRangeY, int endRangeY) {
+/*    protected void setPosition(int startRangeX, int endRangeX, int startRangeY, int endRangeY) {
         if (startRangeX == endRangeX) {
             for (int y = startRangeY; y <= endRangeY; y++) {
-                //[startRangeX][y] = y;
+                [startRangeX][y] = y;
             }
         } else if (startRangeY == endRangeY) {
             for (int x = startRangeX; x <= endRangeX; x++) {
-                //[x][startRangeY] = x;
+                [x][startRangeY] = x;
             }
         }
-    }
+    }*/
 
     public char getAcronym() {
         return acronym;

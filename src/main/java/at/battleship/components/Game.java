@@ -25,8 +25,8 @@ public class Game {
     private static final Pattern SHIP_POSITION_PATTERN = Pattern.compile("^([a-jA-J]+[1-9]|10)$");
 
     public void play() {
-        player1 = new Player("Fabian", true, 0);
-        player2 = new Player("Captain AngryMan", false, 0);
+        player1 = new Player("Fabian", false, true, 0);
+        player2 = new Player("Captain AngryMan", false, false, 0);
         this.setBattlefield(player1, player2);
     }
 

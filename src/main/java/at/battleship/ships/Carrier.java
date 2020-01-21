@@ -1,7 +1,6 @@
 package at.battleship.ships;
 
 import at.battleship.components.Player;
-import at.battleship.components.Playground;
 
 public class Carrier extends Ship {
 

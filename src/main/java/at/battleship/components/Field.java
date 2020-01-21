@@ -26,12 +26,6 @@ public class Field {
         return fieldRenderState;
     }
 
-/*    public void setFieldRenderState(FieldRenderState fieldRenderState) {
-        if (!(this.ship == null)) {
-            this.fieldRenderState = fieldRenderState;
-        }
-    }*/
-
     public Ship getShip() {
         return ship;
     }
@@ -46,26 +40,44 @@ public class Field {
         SUBMARINE
     }
 
-    public Character displayCurrentState() {
-        switch (this.fieldRenderState) {
-            case NEUTRAL:
-                return '-';
-            case MISS:
-                return ' ';
-            case HIT:
-                return 'X';
-            case CARRIER:
-                return 'C';
-            case BATTLESHIP:
-                return 'B';
-            case DESTROYER:
-                return 'D';
-            case SUBMARINE:
-                return 'S';
-            default:
-                return 'o';
+    public String displayCurrentState(boolean visible) {
+        if (visible) {
+            switch (this.fieldRenderState) {
+                case NEUTRAL:
+                    return " - ";
+                case MISS:
+                    return "   ";
+                case HIT:
+                    return " X ";
+                case CARRIER:
+                    return " C ";
+                case BATTLESHIP:
+                    return " B ";
+                case DESTROYER:
+                    return " D ";
+                case SUBMARINE:
+                    return " S ";
+                default:
+                    return " o ";
+            }
+        } else {
+            switch (this.fieldRenderState) {
+                case NEUTRAL:
+                case CARRIER:
+                case BATTLESHIP:
+                case DESTROYER:
+                case SUBMARINE:
+                    return " - ";
+                case MISS:
+                    return "   ";
+                case HIT:
+                    return " X ";
+                default:
+                    return " o ";
+            }
         }
     }
+
 
     public void setCurrentState(CurrentState currentState) {
         this.fieldRenderState = currentState;
