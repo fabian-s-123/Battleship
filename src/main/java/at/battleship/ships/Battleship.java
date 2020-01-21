@@ -6,6 +6,10 @@ public class Battleship extends Ship {
 
     private int tiles = 4;
     private Character acronym = 'B';
+    private int startRangeX;
+    private int endRangeX;
+    private int startRangeY;
+    private int endRangeY;
     private Player player;
     private int[][] positionShip;
 
@@ -17,7 +21,7 @@ public class Battleship extends Ship {
         return tiles;
     }
 
-    public Character getAcronym() {
+    public char getAcronym() {
         return acronym;
     }
 

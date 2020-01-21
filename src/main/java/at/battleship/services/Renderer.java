@@ -4,16 +4,18 @@ import at.battleship.components.Playground;
 
 public class Renderer {
 
-    private Playground yourPlayground;
-    private Playground opponentPlayground;
+    private Playground playGroundPlayer1;
+    private Playground playGroundPlayer2;
 
     public Renderer(Playground yourPlayground, Playground opponentPlayground) {
-        this.yourPlayground = yourPlayground;
-        this.opponentPlayground = opponentPlayground;
+        this.playGroundPlayer1 = yourPlayground;
+        this.playGroundPlayer2 = opponentPlayground;
     }
 
-    public void renderYourPlayground() {}
+    public void renderPlaygroundPlayer1() {
+        System.out.println(playGroundPlayer1.getMap()[0][0].getFieldRenderState());
+    }
 
-    public void renderOpponentPlayground(){}
+    public void renderPlayGroundPlayer2(){}
 
 }

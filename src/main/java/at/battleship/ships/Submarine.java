@@ -6,9 +6,12 @@ public class Submarine extends Ship {
 
     private int tiles = 2;
     private Character acronym = 'S';
+    private int startRangeX;
+    private int endRangeX;
+    private int startRangeY;
+    private int endRangeY;
     private Player player;
     private int[][] positionShip;
-
 
     public Submarine(Player player, int startRangeX, int endRangeX, int startRangeY, int endRangeY) {
         super(player, startRangeX, endRangeX, startRangeY, endRangeY);
@@ -18,7 +21,7 @@ public class Submarine extends Ship {
         return tiles;
     }
 
-    public Character getAcronym() {
+    public char getAcronym() {
         return acronym;
     }
 

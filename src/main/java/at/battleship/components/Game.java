@@ -21,20 +21,34 @@ public class Game {
     private boolean validInput;
     private int currentHitPointsPlayer1 = 30;
     private int currentHitPointsPlayer2 = 30;
-    private Renderer renderer = new Renderer();
+
     private static final Pattern SHIP_POSITION_PATTERN = Pattern.compile("^([a-jA-J]+[1-9]|10)$");
 
-    public void setBattlefield(Player player1, Player player2) {
-        Playground playgroundPlayer1 = new Playground();
-        Playground playgroundPlayer2 = new Playground();
-        this.setShipsPlayer1(playgroundPlayer1);
-        this.setShipsPlayer2(playgroundPlayer2);
+    public void play() {
+        player1 = new Player("Fabian", true, 0);
+        player2 = new Player("Captain AngryMan", false, 0);
+        this.setBattlefield(player1, player2);
     }
 
 
-    public void setShipsPlayer1(Playground playground) {
+    public void setBattlefield(Player player1, Player player2) {
+        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1(player1);
+        ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2(player2);
+
+        Playground playgroundPlayer1 = new Playground(shipsPlayer1, player1);
+        Playground playgroundPlayer2 = new Playground(shipsPlayer2, player2);
+
+//        this.addShipsToThePlayground(shipsPlayer1, playgroundPlayer1);
+//        this.addShipsToThePlayground(shipsPlayer2, playgroundPlayer2);
+
+        Renderer renderer = new Renderer(playgroundPlayer1, playgroundPlayer2);
+        renderer.renderPlaygroundPlayer1();
+        renderer.renderPlayGroundPlayer2();
+    }
+
+    public ArrayList<Ship> setShipsPlayer1(Player player1) {
         ArrayList<Ship> ships = new ArrayList<>();
-        Carrier carrier = new Carrier(player1, 3, 7, 8, 8);
+        Carrier carrier = new Carrier(player1,8, 8, 3, 7);
         ships.add(carrier);
 
         Battleship battleship1 = new Battleship(player1, 0, 0, 3, 6);
@@ -57,10 +71,12 @@ public class Game {
         ships.add(submarine3);
         Submarine submarine4 = new Submarine(player1, 8, 9, 9, 9);
         ships.add(submarine4);
+
+        return ships;
     }
 
 
-    public void setShipsPlayer2(Playground playground) {
+    public ArrayList<Ship> setShipsPlayer2(Player player2) {
         ArrayList<Ship> ships = new ArrayList<>();
         Carrier carrier = new Carrier(player2, 0, 4, 0, 0);
         ships.add(carrier);
@@ -85,17 +101,27 @@ public class Game {
         ships.add(submarine3);
         Submarine submarine4 = new Submarine(player2, 2, 3, 9, 9);
         ships.add(submarine4);
+
+        return ships;
     }
 
-    private void addShipsToThePlayground(ArrayList<Ship> ships, Playground playground) {
-        for (int i = 0; i < playground.getMap().length; i++) {
-            playground.setMap(ships.get(i).getPositionShip());
+/*    private void addShipsToThePlayground(ArrayList<Ship> ships, Playground playground) {
+        for (int i = 0; i < ships.size(); i++) {
+            int[] rangeX = ships.get(i).getValueBetweenX(ships.get(i));
+            int[] rangeY = ships.get(i).getValueBetweenY(ships.get(i));
+            if (!(rangeX.length == 0)) {
+                for (int k = 0; k < rangeX.length; k++) {
+                    this.map[k][ships.get(i).getStartRangeY()].setShip(ships.get(i));
+                }
+            } else if (!(rangeY.length == 0)) {
+                for (int l = 0; l < rangeY.length; l++) {
+                    this.map[ships.get(i).getStartRangeX()][l].setShip(ships.get(i));
+                }
+            }
         }
-    }
+    }*/
 
-
-
-    public void play() {
+/*    public void play() {
         this.createBotOpponent();
         System.out.println("Welcome to Battleships\nPlease enter your name:");
         while (isPlaying) {
@@ -114,29 +140,27 @@ public class Game {
                     System.out.println("Incorrect input.");
                 }
                 System.out.println("Next, set the direction of your Ship: user 'up', 'down', 'right' & 'left' for direction");
-
-
             }
-
-
         }
         this.setShips();
 
-    }
+    }*/
+
 
     private static boolean checkInput(String input) {
         Matcher matcher = SHIP_POSITION_PATTERN.matcher(input);
         return matcher.matches();
     }
 
-    private void setShips() {}
+    private void setShips() {
+    }
 
     private void createBotOpponent() {
         this.player2.setName("Captain AngryMan");
         this.player2.setPlayerTurn(false);
     }
 
-    private String simulateOpponent(){
+    private String simulateOpponent() {
         return "";
     }
 

@@ -6,6 +6,10 @@ public class Destroyer extends Ship {
 
     private int tiles = 3;
     private Character acronym = 'D';
+    private int startRangeX;
+    private int endRangeX;
+    private int startRangeY;
+    private int endRangeY;
     private Player player;
     private int[][] positionShip;
 
@@ -17,7 +21,7 @@ public class Destroyer extends Ship {
         return tiles;
     }
 
-    public Character getAcronym() {
+    public char getAcronym() {
         return acronym;
     }
 

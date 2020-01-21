@@ -5,30 +5,32 @@ import at.battleship.ships.Ship;
 
 public class Field {
 
-    private String fieldName;
-    private FieldRenderState fieldRenderState;
+    //private String fieldName;
+    private FieldRenderState.CurrentState fieldRenderState;
     private Ship ship;
 
-    public Field(String fieldName, FieldRenderState fieldRenderState, Ship ship) {
-        this.fieldName = fieldName;
-        this.fieldRenderState = fieldRenderState;
+    public Field(Ship ship) {
+        //this.fieldName = fieldName;
+        this.fieldRenderState =  FieldRenderState.CurrentState.NEUTRAL;
         this.ship = ship;
     }
 
-    public String getFieldName() {
+/*    public String getFieldName() {
         return fieldName;
     }
 
     public void setFieldName(String fieldName) {
         this.fieldName = fieldName;
-    }
+    }*/
 
-    public FieldRenderState getFieldRenderState() {
+    public FieldRenderState.CurrentState getFieldRenderState() {
         return fieldRenderState;
     }
 
-    public void setFieldRenderState(FieldRenderState fieldRenderState) {
-        this.fieldRenderState = fieldRenderState;
+    public void setFieldRenderState(FieldRenderState.CurrentState fieldRenderState) {
+        if (!(this.ship == null)) {
+            this.fieldRenderState = fieldRenderState;
+        }
     }
 
     public Ship getShip() {
@@ -37,6 +39,20 @@ public class Field {
 
     public void setShip(Ship ship) {
         this.ship = ship;
+        switch (this.ship.getAcronym()) {
+            case 'C':
+                this.fieldRenderState = FieldRenderState.CurrentState.CARRIER;
+                break;
+            case 'B':
+                this.fieldRenderState = FieldRenderState.CurrentState.BATTLESHIP;
+                break;
+            case 'D':
+                this.fieldRenderState = FieldRenderState.CurrentState.DESTROYER;
+                break;
+            case 'S':
+                this.fieldRenderState = FieldRenderState.CurrentState.SUBMARINE;
+                break;
+        }
     }
 
     public boolean isEmpty() {

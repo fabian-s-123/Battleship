@@ -1,11 +1,16 @@
 package at.battleship.ships;
 
 import at.battleship.components.Player;
+import at.battleship.components.Playground;
 
 public class Carrier extends Ship {
 
     private int tiles = 5;
     private Character acronym = 'C';
+    private int startRangeX;
+    private int endRangeX;
+    private int startRangeY;
+    private int endRangeY;
     private Player player;
     private int[][] positionShip;
 
@@ -17,7 +22,7 @@ public class Carrier extends Ship {
         return tiles;
     }
 
-    public Character getAcronym() {
+    public char getAcronym() {
         return acronym;
     }
 
