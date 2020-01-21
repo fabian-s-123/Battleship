@@ -41,8 +41,7 @@ public class Game {
         this.addShipsToThePlayground(shipsPlayer1, playgroundPlayer1);
         this.addShipsToThePlayground(shipsPlayer2, playgroundPlayer2);
 
-        Renderer renderer = new Renderer(playgroundPlayer1, playgroundPlayer2);
-        renderer.renderPlaygrounds();
+        Renderer renderer = new Renderer(playgroundPlayer1, playgroundPlayer2, player1, player2);
     }
 
     public ArrayList<Ship> setShipsPlayer1(Player player1) {
