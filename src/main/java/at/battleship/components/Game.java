@@ -38,12 +38,11 @@ public class Game {
         Playground playgroundPlayer1 = new Playground(shipsPlayer1, player1);
         Playground playgroundPlayer2 = new Playground(shipsPlayer2, player2);
 
-//        this.addShipsToThePlayground(shipsPlayer1, playgroundPlayer1);
-//        this.addShipsToThePlayground(shipsPlayer2, playgroundPlayer2);
+        this.addShipsToThePlayground(shipsPlayer1, playgroundPlayer1);
+        this.addShipsToThePlayground(shipsPlayer2, playgroundPlayer2);
 
         Renderer renderer = new Renderer(playgroundPlayer1, playgroundPlayer2);
-        renderer.renderPlaygroundPlayer1();
-        renderer.renderPlayGroundPlayer2();
+        renderer.renderPlaygrounds();
     }
 
     public ArrayList<Ship> setShipsPlayer1(Player player1) {
@@ -51,14 +50,14 @@ public class Game {
         Carrier carrier = new Carrier(player1,8, 8, 3, 7);
         ships.add(carrier);
 
-        Battleship battleship1 = new Battleship(player1, 0, 0, 3, 6);
+        Battleship battleship1 = new Battleship(player1, 3, 6, 0, 0);
         ships.add(battleship1);
-        Battleship battleship2 = new Battleship(player1, 3, 6, 3, 3);
+        Battleship battleship2 = new Battleship(player1, 3, 3, 3, 6);
         ships.add(battleship2);
 
-        Destroyer destroyer1 = new Destroyer(player1, 1, 1, 0, 2);
+        Destroyer destroyer1 = new Destroyer(player1, 0, 2, 1, 1);
         ships.add(destroyer1);
-        Destroyer destroyer2 = new Destroyer(player1, 4, 6, 0, 0);
+        Destroyer destroyer2 = new Destroyer(player1, 0, 0, 4, 6);
         ships.add(destroyer2);
         Destroyer destroyer3 = new Destroyer(player1, 1, 3, 9, 9);
         ships.add(destroyer3);
@@ -88,9 +87,9 @@ public class Game {
 
         Destroyer destroyer1 = new Destroyer(player2, 2, 2, 2, 4);
         ships.add(destroyer1);
-        Destroyer destroyer2 = new Destroyer(player2, 6, 8, 5, 5);
+        Destroyer destroyer2 = new Destroyer(player2, 5, 7, 5, 5);
         ships.add(destroyer2);
-        Destroyer destroyer3 = new Destroyer(player2, 6, 8, 8, 8);
+        Destroyer destroyer3 = new Destroyer(player2, 5, 7, 8, 8);
         ships.add(destroyer3);
 
         Submarine submarine1 = new Submarine(player2, 9, 9, 0, 1);
@@ -105,21 +104,21 @@ public class Game {
         return ships;
     }
 
-/*    private void addShipsToThePlayground(ArrayList<Ship> ships, Playground playground) {
+    private void addShipsToThePlayground(ArrayList<Ship> ships, Playground playground) {
         for (int i = 0; i < ships.size(); i++) {
             int[] rangeX = ships.get(i).getValueBetweenX(ships.get(i));
             int[] rangeY = ships.get(i).getValueBetweenY(ships.get(i));
             if (!(rangeX.length == 0)) {
                 for (int k = 0; k < rangeX.length; k++) {
-                    this.map[k][ships.get(i).getStartRangeY()].setShip(ships.get(i));
+                    playground.getMap()[rangeX[k]][ships.get(i).getStartRangeY()].setShip(ships.get(i));
                 }
             } else if (!(rangeY.length == 0)) {
                 for (int l = 0; l < rangeY.length; l++) {
-                    this.map[ships.get(i).getStartRangeX()][l].setShip(ships.get(i));
+                    playground.getMap()[ships.get(i).getStartRangeX()][rangeY[l]].setShip(ships.get(i));
                 }
             }
         }
-    }*/
+    }
 
 /*    public void play() {
         this.createBotOpponent();
