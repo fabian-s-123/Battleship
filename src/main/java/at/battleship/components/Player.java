@@ -6,9 +6,9 @@ public class Player {
     private boolean playerTurn;
     private boolean isVisible;
     private int currentScore;
-    private int movesRequiredToWin = 0;
+    private int movesTally = 0;
 
-    public Player(String name, boolean playerTurn, boolean isVisible, int currentScore) {
+    Player(String name, boolean playerTurn, boolean isVisible, int currentScore) {
         this.name = name;
         this.playerTurn = playerTurn;
         this.isVisible = isVisible;
@@ -19,15 +19,11 @@ public class Player {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public boolean getPlayerTurn() {
+    boolean getPlayerTurn() {
         return playerTurn;
     }
 
-    public void setPlayerTurn(boolean playerTurn) {
+    void setPlayerTurn(boolean playerTurn) {
         this.playerTurn = playerTurn;
     }
 
@@ -35,23 +31,19 @@ public class Player {
         return isVisible;
     }
 
-    public void setVisible(boolean visible) {
-        isVisible = visible;
-    }
-
     public int getCurrentScore() {
         return currentScore;
     }
 
-    public void setCurrentScore(int currentScore) {
+    void setCurrentScore(int currentScore) {
         this.currentScore = currentScore;
     }
 
-    public int getMovesRequiredToWin() {
-        return movesRequiredToWin;
+    int getMovesTally() {
+        return movesTally;
     }
 
-    public void addMovesRequiredToWin() {
-        this.movesRequiredToWin++;
+    void addMovesTally() {
+        this.movesTally++;
     }
 }

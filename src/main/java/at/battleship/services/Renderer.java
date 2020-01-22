@@ -21,30 +21,19 @@ public class Renderer {
         this.render();
     }
 
-/*    public void renderPlaygrounds() {
-        System.out.println("Player 1");
-        for (int y = 0; y < this.playGroundPlayer1.getMap().length; y++) {
-            System.out.println();
-            for (int x = 0; x < this.playGroundPlayer1.getMap().length; x++) {
-                System.out.print(playGroundPlayer1.getMap()[x][y].displayCurrentState());
-            }
-        }
-        System.out.println("\n");
-        System.out.println("Player 2");
-
-        for (int y = 0; y < this.playGroundPlayer2.getMap().length; y++) {
-            System.out.println();
-            for (int x = 0; x < this.playGroundPlayer2.getMap().length; x++) {
-                System.out.print(playGroundPlayer2.getMap()[x][y].displayCurrentState());
-            }
-        }
-    }*/
-
     public void render() throws InterruptedException {
         Thread.sleep(2500);
-        clearConsole();
-        draw(playgroundPlayer1, player1);
-        draw(playgroundPlayer2, player2);
+        this.clearConsole();
+        this.draw(playgroundPlayer1, player1);
+        this.draw(playgroundPlayer2, player2);
+    }
+
+    private void clearConsole() {
+        try {
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void draw(Playground playground, Player player) {
@@ -94,7 +83,6 @@ public class Renderer {
         return sb.toString();
     }
 
-
     private String renderTop(Playground playground) {
         StringBuilder sb = new StringBuilder();
         sb.append("   \u250C\u2500");
@@ -104,7 +92,6 @@ public class Renderer {
         sb.append("\u2500\u2500\u2510\n");
         return sb.toString();
     }
-
 
     private String renderBottom(Playground playground) {
         StringBuilder sb = new StringBuilder();
@@ -124,14 +111,5 @@ public class Renderer {
         }
         sb.append("\u2500\u2500\u2502\n");
         return sb.toString();
-    }
-
-    private void clearConsole() {
-        try {
-            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
-                //Runtime.getRuntime().exec("cls");
-        } catch (InterruptedException | IOException e) {
-            e.printStackTrace();
-        }
     }
 }

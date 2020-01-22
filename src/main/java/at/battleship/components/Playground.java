@@ -1,7 +1,5 @@
 package at.battleship.components;
 
-import at.battleship.ships.*;
-
 import java.util.ArrayList;
 
 public class Playground {
@@ -21,7 +19,7 @@ public class Playground {
         Field [][] array = new Field[x1][y1];
         for (int x = 0; x < 10; x++) {
             for (int y = 0; y < 10; y++) {
-                array[x][y] = new Field(null);
+                array[x][y] = new Field();
             }
         }
         return array;
@@ -106,10 +104,6 @@ public class Playground {
                 result = -2;
         }
         return result;
-    }
-
-    public void setMap(Field[][] map) {
-        this.map = map;
     }
 
     public Field[][] getMap() {

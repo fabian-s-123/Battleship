@@ -1,33 +1,11 @@
 package at.battleship.components;
 
-import at.battleship.ships.Ship;
-
 public class Field {
 
-    //private String fieldName;
     private CurrentState fieldRenderState;
-    private Ship ship;
 
-    public Field(Ship ship) {
-        //this.fieldName = fieldName;
+    Field() {
         this.fieldRenderState = CurrentState.NEUTRAL;
-        this.ship = ship;
-    }
-
-/*    public String getFieldName() {
-        return fieldName;
-    }
-
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }*/
-
-    public CurrentState getFieldRenderState() {
-        return fieldRenderState;
-    }
-
-    public Ship getShip() {
-        return ship;
     }
 
     public enum CurrentState {
@@ -79,29 +57,28 @@ public class Field {
     }
 
 
-    public void setCurrentState(CurrentState currentState) {
-        this.fieldRenderState = currentState;
-    }
-
-    public void setShip(Ship ship) {
-        this.ship = ship;
-        switch (this.ship.getAcronym()) {
-            case 'C':
+    void setShip(Ship.Type ship) {
+        switch (ship) {
+            case CARRIER:
                 this.setCurrentState(CurrentState.CARRIER);
                 break;
-            case 'B':
+            case BATTLESHIP:
                 this.setCurrentState(CurrentState.BATTLESHIP);
                 break;
-            case 'D':
+            case DESTROYER:
                 this.setCurrentState(CurrentState.DESTROYER);
                 break;
-            case 'S':
+            case SUBMARINE:
                 this.setCurrentState(CurrentState.SUBMARINE);
                 break;
         }
     }
 
-    public boolean isEmpty() {
-        return ship == null;
+    CurrentState getFieldRenderState() {
+        return fieldRenderState;
+    }
+
+    void setCurrentState(CurrentState currentState) {
+        this.fieldRenderState = currentState;
     }
 }
