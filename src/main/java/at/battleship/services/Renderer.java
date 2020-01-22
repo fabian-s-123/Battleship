@@ -41,7 +41,7 @@ public class Renderer {
     }*/
 
     public void render() throws InterruptedException {
-        Thread.sleep(2000);
+        Thread.sleep(2500);
         clearConsole();
         draw(playgroundPlayer1, player1);
         draw(playgroundPlayer2, player2);
@@ -126,7 +126,7 @@ public class Renderer {
         return sb.toString();
     }
 
-    public void clearConsole() {
+    private void clearConsole() {
         try {
             new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
                 //Runtime.getRuntime().exec("cls");
