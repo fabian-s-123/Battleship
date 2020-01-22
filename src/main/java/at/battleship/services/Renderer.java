@@ -3,11 +3,22 @@ package at.battleship.services;
 import at.battleship.components.Player;
 import at.battleship.components.Playground;
 
+import java.io.IOException;
+
 public class Renderer {
 
-    public Renderer(Playground playgroundPlayer1, Playground playgroundPlayer2, Player player1, Player player2) {
-        this.draw(playgroundPlayer1, player1);
-        this.draw(playgroundPlayer2, player2);
+    private Playground playgroundPlayer1;
+    private Playground playgroundPlayer2;
+    private Player player1;
+    private Player player2;
+
+    public Renderer(Playground playgroundPlayer1, Playground playgroundPlayer2, Player player1, Player player2) throws InterruptedException {
+        this.playgroundPlayer1 = playgroundPlayer1;
+        this.playgroundPlayer2 = playgroundPlayer2;
+        this.player1 = player1;
+        this.player2 = player2;
+
+        this.render();
     }
 
 /*    public void renderPlaygrounds() {
@@ -29,13 +40,19 @@ public class Renderer {
         }
     }*/
 
-    public void draw(Playground playground, Player player) {
+    public void render() throws InterruptedException {
+        Thread.sleep(2000);
+        clearConsole();
+        draw(playgroundPlayer1, player1);
+        draw(playgroundPlayer2, player2);
+    }
+
+    private void draw(Playground playground, Player player) {
         renderPlayerInformation(player);
         System.out.println(renderPlayground(playground, player));
     }
 
     private void renderPlayerInformation(Player player) {
-        //System.out.println("\n   " + player.getName() + "  -  current score: " + player.getScore() + "\n");
         System.out.printf("\n   %-22s Current Score: %2d\n\n",  player.getName(), player.getCurrentScore());
     }
 
@@ -99,7 +116,6 @@ public class Renderer {
         return sb.toString();
     }
 
-
     private String renderLine(Playground playground) {
         StringBuilder sb = new StringBuilder();
         sb.append("   \u2502\u2500");
@@ -108,5 +124,14 @@ public class Renderer {
         }
         sb.append("\u2500\u2500\u2502\n");
         return sb.toString();
+    }
+
+    public void clearConsole() {
+        try {
+            new ProcessBuilder("cmd", "/c", "cls").inheritIO().start().waitFor();
+                //Runtime.getRuntime().exec("cls");
+        } catch (InterruptedException | IOException e) {
+            e.printStackTrace();
+        }
     }
 }

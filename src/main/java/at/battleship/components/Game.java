@@ -19,9 +19,10 @@ public class Game {
     private ArrayList<Ship> shipsPlayer2;
     private LinkedList<String> movesPlayer1 = new LinkedList<>();
     private LinkedList<String> movesPlayer2 = new LinkedList<>();
+    private Renderer renderer;
 
 
-    private static final Pattern SHIP_POSITION_PATTERN = Pattern.compile("^([A-J]+[1-9]|10)$");
+    private static final Pattern SHIP_POSITION_PATTERN = Pattern.compile("^([A-J])+(10|[1-9])$");
 
     public void play() throws InterruptedException {
         /*player1 = new Player("Fabian", false, true, 0);
@@ -35,7 +36,7 @@ public class Game {
     }
 
 
-    public void setBattlefield(Player player1, Player player2) {
+    public void setBattlefield(Player player1, Player player2) throws InterruptedException {
         ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1(player1);
         ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2(player2);
 
@@ -45,7 +46,7 @@ public class Game {
         this.addShipsToThePlayground(shipsPlayer1, playgroundPlayer1);
         this.addShipsToThePlayground(shipsPlayer2, playgroundPlayer2);
 
-        Renderer renderer = new Renderer(playgroundPlayer1, playgroundPlayer2, player1, player2);
+        this.renderer = new Renderer(playgroundPlayer1, playgroundPlayer2, player1, player2);
     }
 
     public ArrayList<Ship> setShipsPlayer1(Player player1) {
@@ -125,7 +126,7 @@ public class Game {
 
     public void playIntro() {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Welcome to Battleships\nPlease enter your name:");
+        System.out.println("Welcome to Battleships\n\nPlease enter your name:");
         boolean validName = false;
         String player1Name = sc.nextLine();
         while (!validName) {
@@ -159,8 +160,14 @@ public class Game {
 
             while (players[0].getPlayerTurn()) {
                 players[0].addMovesRequiredToWin();
-                System.out.println("Your turn. Enter your guess:");
+                System.out.println("Your turn. Enter your guess:                     To exit enter 'e'");
                 String player1Input = sc.nextLine();
+
+                //checks for exit
+                if (player1Input.equals("e")) {
+                    System.out.println("Good bye.");
+                    System.exit(0);
+                }
 
                 //checks if the move has already been made
                 boolean moveAlreadyMade = movesPlayer1.stream()
@@ -173,7 +180,8 @@ public class Game {
                     if (guessX < 0 || guessX > 9 && guessY < 0 || guessY > 9) {
                         break;
                     }
-                    players[0].setPlayerTurn(this.attackOpponent(guessX, guessY, players[1], this.playgroundPlayer2)); //attacks
+                    players[0].setPlayerTurn(this.attackOpponent(guessX, guessY, players[1], players[0], this.playgroundPlayer2)); //attacks
+                    this.renderer.render();
                     if (players[0].getCurrentScore() == 30) { //TODO make 30 the dynamic number of all tiles of all the ships in each Playground
                         System.out.println("Congratulations " + players[0].getName() + ", you won!");
                         System.out.println("It took you " +  players[0].getMovesRequiredToWin() + " rounds to defeat your opponent.");
@@ -210,7 +218,8 @@ public class Game {
                     moveAlreadyMade = movesPlayer2.stream()
                             .equals(player2Input);
                 } while (moveAlreadyMade);
-                players[1].setPlayerTurn(this.attackOpponent(guessX, guessY, players[0], this.playgroundPlayer1)); //attacks
+                players[1].setPlayerTurn(this.attackOpponent(guessX, guessY, players[0], players[1], this.playgroundPlayer1)); //attacks
+                this.renderer.render();
                 if (players[1].getCurrentScore() == 30) { //TODO make 30 the dynamic number of all tiles of all the ships in each Playground
                     System.out.println("Congratulations " + players[0].getName() + ", you won!");
                     System.out.println("It took you " +  players[0].getMovesRequiredToWin() + " rounds to defeat your opponent.");
@@ -241,12 +250,12 @@ public class Game {
         }
     }
 
-    private boolean attackOpponent(int x, int y, Player opponent, Playground opponentsPlayground) {
+    private boolean attackOpponent(int x, int y, Player opponent, Player you, Playground opponentsPlayground) throws InterruptedException {
         boolean continueAttack = false;
         int attack = opponentsPlayground.checkPosition(x, y);
         if (attack == 1) {
             System.out.println("Hit!");
-            opponent.setCurrentScore(opponent.getCurrentScore() + 1);
+            you.setCurrentScore(you.getCurrentScore() + 1);
             continueAttack = true;
         } else if (attack == 0) {
             System.out.println("Miss...");

@@ -58,7 +58,7 @@ public class Field {
                 case SUBMARINE:
                     return " S ";
                 default:
-                    return " o ";
+                    return " e ";
             }
         } else {
             switch (this.fieldRenderState) {
@@ -73,7 +73,7 @@ public class Field {
                 case HIT:
                     return " X ";
                 default:
-                    return " o ";
+                    return " e ";
             }
         }
     }

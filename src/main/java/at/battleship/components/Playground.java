@@ -86,7 +86,7 @@ public class Playground {
     }
 
 
-    public int checkPosition(int posX, int posY) {
+    public int checkPosition(int posX, int posY) throws InterruptedException {
         Field currentField = this.getMap()[posX][posY];
         Field.CurrentState currentState = currentField.getFieldRenderState();
         int result = -1;
