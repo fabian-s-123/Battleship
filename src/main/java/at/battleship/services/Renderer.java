@@ -36,7 +36,7 @@ public class Renderer {
 
     private void renderPlayerInformation(Player player) {
         //System.out.println("\n   " + player.getName() + "  -  current score: " + player.getScore() + "\n");
-        System.out.printf("\n   %-22s Current Score: %2d\n\n",  player.getName(), player.getScore());
+        System.out.printf("\n   %-22s Current Score: %2d\n\n",  player.getName(), player.getCurrentScore());
     }
 
     private String renderPlayground(Playground playground, Player player) {

@@ -86,9 +86,26 @@ public class Playground {
     }
 
 
-
-    private String checkPosition(int posX, int posY) {
-        return " ";
+    public int checkPosition(int posX, int posY) {
+        Field currentField = this.getMap()[posX][posY];
+        Field.CurrentState currentState = currentField.getFieldRenderState();
+        int result = -1;
+        switch (currentState) {
+            case NEUTRAL:
+                result = 0;
+                currentField.setCurrentState(Field.CurrentState.MISS);
+                break;
+            case CARRIER:
+            case BATTLESHIP:
+            case DESTROYER:
+            case SUBMARINE:
+                result = 1;
+                currentField.setCurrentState(Field.CurrentState.HIT);
+                break;
+            default:
+                result = -2;
+        }
+        return result;
     }
 
     public void setMap(Field[][] map) {

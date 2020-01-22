@@ -5,13 +5,14 @@ public class Player {
     private String name;
     private boolean playerTurn;
     private boolean isVisible;
-    private int score;
+    private int currentScore;
+    private int movesRequiredToWin = 0;
 
-    public Player(String name, boolean playerTurn, boolean isVisible, int score) {
+    public Player(String name, boolean playerTurn, boolean isVisible, int currentScore) {
         this.name = name;
         this.playerTurn = playerTurn;
         this.isVisible = isVisible;
-        this.score = score;
+        this.currentScore = currentScore;
     }
 
     public String getName() {
@@ -38,11 +39,19 @@ public class Player {
         isVisible = visible;
     }
 
-    public int getScore() {
-        return score;
+    public int getCurrentScore() {
+        return currentScore;
     }
 
-    public void setScore(int score) {
-        this.score = score;
+    public void setCurrentScore(int currentScore) {
+        this.currentScore = currentScore;
+    }
+
+    public int getMovesRequiredToWin() {
+        return movesRequiredToWin;
+    }
+
+    public void addMovesRequiredToWin() {
+        this.movesRequiredToWin++;
     }
 }
