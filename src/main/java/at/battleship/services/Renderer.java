@@ -17,15 +17,23 @@ public class Renderer {
         this.playgroundPlayer2 = playgroundPlayer2;
         this.player1 = player1;
         this.player2 = player2;
-
-        this.render();
     }
 
     public void render() throws InterruptedException {
         Thread.sleep(2500);
         this.clearConsole();
-        this.draw(playgroundPlayer1, player1);
-        this.draw(playgroundPlayer2, player2);
+        this.draw(this.playgroundPlayer1, this.player1);
+        this.draw(this.playgroundPlayer2, this.player2);
+    }
+
+    public void renderOnePlayground(Player player) {
+        if (player == this.player1) {
+            this.clearConsole();
+            this.draw(this.playgroundPlayer1, this.player1);
+        } else {
+            this.clearConsole();
+            this.draw(this.playgroundPlayer2, this.player2);
+        }
     }
 
     private void clearConsole() {

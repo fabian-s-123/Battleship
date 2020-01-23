@@ -8,7 +8,7 @@ public class Ship {
     private int startRangeY;
     private int endRangeY;
 
-    public Ship(Type type, int startRangeX, int endRangeX, int startRangeY, int endRangeY) {
+    Ship(Type type, int startRangeX, int endRangeX, int startRangeY, int endRangeY) {
         this.type = type;
         this.startRangeX = startRangeX;
         this.endRangeX = endRangeX;
@@ -17,7 +17,7 @@ public class Ship {
         //this.setPosition(startRangeX, endRangeX, startRangeY, endRangeY);
     }
 
-    public Ship(Type type) {
+    Ship(Type type) {
         this.type = type;
     }
 
@@ -34,6 +34,9 @@ public class Ship {
         }
     }
 
+    int getLength(Type type) {
+        return type.length;
+    }
 
     /*    protected void setPosition(int startRangeX, int endRangeX, int startRangeY, int endRangeY) {
         if (startRangeX == endRangeX) {
@@ -47,7 +50,7 @@ public class Ship {
         }
     }*/
 
-    public int[] getValueBetweenX(Ship ship) {
+    int[] getValueBetweenX(Ship ship) {
         if ((ship.getEndRangeX() - ship.getStartRangeX()) == 0) {
             return new int[0];
         } else {
@@ -59,7 +62,7 @@ public class Ship {
         }
     }
 
-    public int[] getValueBetweenY(Ship ship) {
+    int[] getValueBetweenY(Ship ship) {
         if ((ship.getEndRangeY() - ship.getStartRangeY()) == 0) {
             return new int[0];
         } else {
@@ -71,15 +74,11 @@ public class Ship {
         }
     }
 
-    public Type getType () {
+    Type getType() {
         return this.type;
     }
 
-    public boolean isInRange(int x, int y) {
-        return false;
-    }
-
-    public int getStartRangeX() {
+    int getStartRangeX() {
         return startRangeX;
     }
 
@@ -87,7 +86,7 @@ public class Ship {
         this.startRangeX = startRangeX;
     }
 
-    public int getEndRangeX() {
+    private int getEndRangeX() {
         return endRangeX;
     }
 
@@ -95,7 +94,7 @@ public class Ship {
         this.endRangeX = endRangeX;
     }
 
-    public int getStartRangeY() {
+    int getStartRangeY() {
         return startRangeY;
     }
 
@@ -103,7 +102,7 @@ public class Ship {
         this.startRangeY = startRangeY;
     }
 
-    public int getEndRangeY() {
+    private int getEndRangeY() {
         return endRangeY;
     }
 
