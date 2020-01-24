@@ -3,6 +3,8 @@ package at.battleship.components;
 import at.battleship.services.Renderer;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,9 +37,13 @@ public class Game {
         this.playgroundPlayer2 = new Playground(player2);
         this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
 
+        //executes the setting of the ships for the bot in a separate thread
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        executorService.execute(() -> setShipsForBot(player2));
+        executorService.shutdown();
+
         //this.setShips(player1);
         //this.setShips(player2);
-        this.setShipsForBot(player2);
 
         this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
         //this.addShipsToThePlayground(shipsPlayer2, this.playgroundPlayer2);
@@ -48,7 +54,7 @@ public class Game {
         System.out.println("First, set Your Ships: you have 1 Carrier (5x1), 2 Battleships (4x1), 3 Destroyer (3x1) & 4 Submarines (2x1).");
         System.out.println("Set the starting point of your Ships.");
         System.out.println("You can set them in the range from 'A-J' and from '1-10' and give them a direction, for example: C4 & down.");
-        System.out.println("Press enter to continue:");
+        System.out.println("Press enter to continue.");
 
         if (sc.nextLine().equals("")) {
             ArrayList<Ship> ships = this.createShipList();
@@ -72,7 +78,6 @@ public class Game {
                 }
                 this.verifyRange(ship, sc);
                 this.addShipToPlayground(ship, this.playgroundPlayer1);
-                this.renderer.renderOnePlayground(player);
             }
             System.out.println("The battlefield is set. Let's get into the game.\n\n");
         }
@@ -88,7 +93,6 @@ public class Game {
                 case SUBMARINE:
                     this.verifyRangeBot(ship);
                     this.addShipToPlayground(ship, this.playgroundPlayer2);
-                    this.renderer.renderOnePlayground(player);
                     break;
             }
         }
@@ -161,28 +165,40 @@ public class Game {
 
         do {
             //random number decides whether the ship will be positioned to the right or downwards
-            double right0Down1 = Math.random();
+            double right1Down0 = Math.random();
 
             int x = (int) (Math.random() * 9);
             xValues.add(x);
             int y = (int) (Math.random() * 9);
             yValues.add(y);
 
-            if (right0Down1 >= 0.5) {
-                if (this.rangeIsWithinBounds(x, ship) && this.checkForPositionCollision(this.playgroundPlayer2, xValues, y, true)) {
-                    ship.setStartRangeX(x);
-                    ship.setEndRangeX(x + ship.getLength(ship.getType()) - 1);
-                    ship.setStartRangeY(y);
-                    ship.setEndRangeY(y);
-                    positionsVerified = true;
+            if (right1Down0 >= 0.5) {
+                if (this.rangeIsWithinBounds(x, ship)) {
+                    //fills xValues with the whole range of relevant xValues
+                    for (int i = x; i <= x + ship.getLength(ship.getType()) - 1; i++) {
+                        xValues.add(i);
+                    }
+                    if (this.checkForPositionCollision(this.playgroundPlayer2, xValues, y, true)) {
+                        ship.setStartRangeX(x);
+                        ship.setEndRangeX(x + ship.getLength(ship.getType()) - 1);
+                        ship.setStartRangeY(y);
+                        ship.setEndRangeY(y);
+                        positionsVerified = true;
+                    }
                 }
             } else {
-                if (this.rangeIsWithinBounds(y, ship) && this.checkForPositionCollision(this.playgroundPlayer2, yValues, x, false)) {
-                    ship.setStartRangeX(x);
-                    ship.setEndRangeX(x);
-                    ship.setStartRangeY(y);
-                    ship.setEndRangeY(y + ship.getLength(ship.getType()) - 1);
-                    positionsVerified = true;
+                if (this.rangeIsWithinBounds(y, ship)) {
+                    //fills yValues with the whole range of relevant yValues
+                    for (int i = y; i <= y + ship.getLength(ship.getType()) - 1; i++) {
+                        yValues.add(i);
+                    }
+                    if (this.checkForPositionCollision(this.playgroundPlayer2, yValues, x, false)) {
+                        ship.setStartRangeX(x);
+                        ship.setEndRangeX(x);
+                        ship.setStartRangeY(y);
+                        ship.setEndRangeY(y + ship.getLength(ship.getType()) - 1);
+                        positionsVerified = true;
+                    }
                 }
             }
             xValues.removeLast();
@@ -280,19 +296,23 @@ public class Game {
     private void playRounds() throws InterruptedException {
         Scanner sc = new Scanner(System.in);
         boolean isPlaying = true;
+
+        System.out.println("Press enter to start the game.");
+        String enter = sc.nextLine();
+
         int coinFlip = (int) (Math.random() * 9) + 1;
         if (coinFlip <= 5) {
             players[0].setPlayerTurn(true);
             System.out.println("It's been randomly selected who gets the first move.");
-            Thread.sleep(1000);
+            Thread.sleep(1500);
             System.out.println("It is " + players[0].getName() + " this time around.");
-            Thread.sleep(1000);
+            Thread.sleep(1500);
         } else {
             players[1].setPlayerTurn(true);
             System.out.println("It's randomly selected who gets the first move.");
-            Thread.sleep(1000);
+            Thread.sleep(1500);
             System.out.println("It is " + players[1].getName() + " this time around.");
-            Thread.sleep(2000);
+            Thread.sleep(2500);
         }
 
         //if currentScore of either Player hits 30 -> isPlaying = false;
