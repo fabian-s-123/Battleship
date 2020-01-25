@@ -7,6 +7,7 @@ public class Ship {
     private int endRangeX;
     private int startRangeY;
     private int endRangeY;
+    private int hitPoints;
 
     Ship(Type type, int startRangeX, int endRangeX, int startRangeY, int endRangeY) {
         this.type = type;
@@ -14,6 +15,7 @@ public class Ship {
         this.endRangeX = endRangeX;
         this.startRangeY = startRangeY;
         this.endRangeY = endRangeY;
+        this.hitPoints = type.length;
     }
 
     Ship(Type type) {
@@ -21,10 +23,10 @@ public class Ship {
     }
 
     public enum Type {
-        CARRIER (5),
-        BATTLESHIP (4),
-        DESTROYER (3),
-        SUBMARINE (2);
+        CARRIER(5),
+        BATTLESHIP(4),
+        DESTROYER(3),
+        SUBMARINE(2);
 
         private final int length;
 
@@ -61,6 +63,14 @@ public class Ship {
         }
     }
 
+    int getHitPoints() {
+        return this.hitPoints;
+    }
+
+    void reduceHitPoints() {
+        hitPoints--;
+    }
+
     Type getType() {
         return this.type;
     }
@@ -95,5 +105,12 @@ public class Ship {
 
     void setEndRangeY(int endRangeY) {
         this.endRangeY = endRangeY;
+    }
+
+    @Override
+    public String toString() {
+        char firstLetter = type.toString().charAt(0);
+        String restOfTheLetters = type.toString().substring(1).toLowerCase();
+        return (firstLetter + restOfTheLetters);
     }
 }
