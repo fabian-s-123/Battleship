@@ -277,10 +277,27 @@ public class Game {
     private int[] testAI() {
         //all successful moves are stored here
         ArrayList<String> successfulMoves = new ArrayList<>();
-        //fills the list
+        //fills the list from the current moves list
         for (String move : this.movesPlayer2) {
             if (this.transformMovesToFieldRenderState(this.playgroundPlayer1, move) == Field.CurrentState.HIT) {
                 successfulMoves.add(move);
+            }
+        }
+        //all potential moves are stored here
+        ArrayList<String> potentialMoves = new ArrayList<>();
+        //fills the list with every field around a already successfully targeted field (=Field.CurrentState.HIT)
+        potentialMoves = this.choosePotentialMoves(successfulMoves);
+
+        //removes all invalid and already targeted fields (=Field.CurrentState.HIT & =Field.CurrentState.MISS)
+        for (String potMoves : potentialMoves) {
+            if (!checkInput(potMoves)) {
+                potentialMoves.remove(potMoves);
+                if (this.transformMovesToFieldRenderState(this.playgroundPlayer1, potMoves) == Field.CurrentState.MISS) {
+                    potentialMoves.remove(potMoves);
+                    if (this.transformMovesToFieldRenderState(this.playgroundPlayer1, potMoves) == Field.CurrentState.HIT) {
+                        potentialMoves.remove(potMoves);
+                    }
+                }
             }
         }
 
@@ -293,7 +310,7 @@ public class Game {
         int yNextMove = -1;
 
         //if no move has been a HIT so far - the next move will be random
-        if (successfulMoves.size() == 0) {
+        if (successfulMoves.size() == 0 || potentialMoves.size() == 0) {
             xNextMove = (int) (Math.random() * 9);
             yNextMove = (int) (Math.random() * 9);
         } else {
@@ -301,6 +318,9 @@ public class Game {
             int yLastSuccessfulMove = this.transformInputToYValue(successfulMoves.get(successfulMoves.size() - 1).substring(1));
 
         }
+
+        potentialMoves = this.choosePotentialMoves(successfulMoves);
+
 
 
         if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
