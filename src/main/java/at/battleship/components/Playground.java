@@ -42,25 +42,35 @@ public class Playground {
     void checkShipHitPoints(int x, int y) throws InterruptedException {
         for (Ship ship : this.ships) {
             if (ship.getValueBetweenX(ship).length != 0) {
-                if (Arrays.stream(ship.getValueBetweenY(ship)).anyMatch(e -> e == x)) {
+                if (Arrays.stream(ship.getValueBetweenX(ship)).anyMatch(e -> e == x) && ship.getStartRangeY() == y) {
                     ship.reduceHitPoints();
                     if (ship.getHitPoints() == 0) {
                         System.out.println("Enemy " + ship.toString() + " has been destroyed.");
-                        Thread.sleep(2500);
+                        Thread.sleep(2000);
                         break;
                     }
-                } //TODO no output for this part -> debug
+                    break;
+                }
             } else {
-                if (Arrays.stream(ship.getValueBetweenY(ship)).anyMatch(e -> e == y)) {
+                if (Arrays.stream(ship.getValueBetweenY(ship)).anyMatch(e -> e == y) && ship.getStartRangeX() == x) {
                     ship.reduceHitPoints();
                     if (ship.getHitPoints() == 0) {
                         System.out.println("Enemy " + ship.toString() + " has been destroyed.");
-                        Thread.sleep(2500);
+                        Thread.sleep(2000);
                         break;
                     }
+                    break;
                 }
             }
         }
+    }
+
+    int checkMaxShipHitPointsCombined() {
+        int currentHitPointsCombined = 0;
+        for (Ship ship : this.ships) {
+            currentHitPointsCombined += ship.getLength(ship.getType());
+        }
+        return currentHitPointsCombined;
     }
 
     private void setPlayer(Player player) {

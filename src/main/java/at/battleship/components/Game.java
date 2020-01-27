@@ -3,6 +3,8 @@ package at.battleship.components;
 import at.battleship.services.Renderer;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -22,7 +24,7 @@ public class Game {
         if (players[0] != null && players[1] != null) {
             this.setBattlefield(this.players[0], this.players[1]);
             this.renderer.render();
-            this.playRounds();
+            this.playRoundStart();
         }
     }
 
@@ -50,14 +52,14 @@ public class Game {
         /**
          * set battlefield for player1 & bot
          */
-        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1(player1);
-        ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2(player2);
-        this.playgroundPlayer1 = new Playground(shipsPlayer1, player1);
-        this.playgroundPlayer2 = new Playground(shipsPlayer2, player2);
-        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
-
-        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
-        this.addShipsToThePlayground(shipsPlayer2, this.playgroundPlayer2);
+//        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1(player1);
+//        ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2(player2);
+//        this.playgroundPlayer1 = new Playground(shipsPlayer1, player1);
+//        this.playgroundPlayer2 = new Playground(shipsPlayer2, player2);
+//        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
+//
+//        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
+//        this.addShipsToThePlayground(shipsPlayer2, this.playgroundPlayer2);
 
 
 
@@ -81,41 +83,26 @@ public class Game {
         /**
          * manual setting for player1 & randomly generated for bot
          */
-//        this.playgroundPlayer1 = new Playground(player1);
-//        this.playgroundPlayer2 = new Playground(player2);
-//        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
-//
-//        //executes the setting of the ships for the bot in a separate thread
-//        ExecutorService executorService = Executors.newFixedThreadPool(10);
-//        executorService.execute(() -> setShipsForBot(player2));
-//        executorService.shutdown();
-//
-//        this.setShips(player1);
+        this.playgroundPlayer1 = new Playground(player1);
+        this.playgroundPlayer2 = new Playground(player2);
+        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
+
+        //executes the setting of the ships for the bot in a separate thread
+        ExecutorService executorService = Executors.newFixedThreadPool(10);
+        executorService.execute(() -> setShipsForBot(player2));
+        executorService.shutdown();
+
+        this.setShips(player1);
     }
 
 
-    //TODO outsource whatever is possible & restructure
-    private void playRounds() throws InterruptedException {
+    private void playRoundStart() throws InterruptedException {
         Scanner sc = new Scanner(System.in);
         boolean isPlaying = true;
 
         System.out.println("Press enter to start the game.");
         String enter = sc.nextLine();
-
-        int coinFlip = (int) (Math.random() * 9) + 1;
-        if (coinFlip <= 5) {
-            players[0].setPlayerTurn(true);
-            System.out.println("It's been randomly selected who gets the first move.");
-            Thread.sleep(1500);
-            System.out.println("It is " + players[0].getName() + " this time around.");
-            Thread.sleep(1500);
-        } else {
-            players[1].setPlayerTurn(true);
-            System.out.println("It's randomly selected who gets the first move.");
-            Thread.sleep(1500);
-            System.out.println("It is " + players[1].getName() + " this time around.");
-            Thread.sleep(2500);
-        }
+        this.selectFirstMove();
 
         //if currentScore of either Player hits 30 -> isPlaying = false;
         while (isPlaying) {
@@ -137,12 +124,8 @@ public class Game {
                         System.exit(0);
                     } else {
                         //checks if the move has already been made
-                        for (String st: this.movesPlayer1) {
-                            if (st.equals(playerInput)) {
-                                moveAlreadyMade = true;
-                                break;
-                            }
-                        }
+                        moveAlreadyMade = this.checkIfMoveAlreadyMade(playerInput, players[0]);
+
                         if (checkInput(playerInput) && playerInput.length() > 1 && !moveAlreadyMade) {
                             this.movesPlayer1.add(playerInput);
                             String playerInputToUpperCase = playerInput.toUpperCase();
@@ -161,11 +144,12 @@ public class Game {
                         this.playgroundPlayer2.checkShipHitPoints(guessX, guessY);
                     }
                     this.renderer.render();
-                    if (players[0].getCurrentScore() == 30) { //TODO make 30 the dynamic number of all tiles of all the ships in each Playground
+                    if (players[0].getCurrentScore() == this.playgroundPlayer1.checkMaxShipHitPointsCombined()) {
                         System.out.println("Congratulations " + players[0].getName() + ", you won!");
                         System.out.println("It took you " + players[0].getMovesTally() + " rounds to defeat your opponent.");
                         players[0].setPlayerTurn(false);
                         isPlaying = false;
+                        break;
                     }
                 }
             }
@@ -195,12 +179,8 @@ public class Game {
                     botInput = reverseX + reverseY;
 
                     //checks if the move has already been made
-                    for (String st: this.movesPlayer2) {
-                        if (st.equals(botInput)) {
-                            moveAlreadyMade = true;
-                            break;
-                        }
-                    }
+                    moveAlreadyMade = this.checkIfMoveAlreadyMade(botInput, players[1]);
+
                 } while (moveAlreadyMade);
                 this.movesPlayer2.add(botInput);
                 System.out.println("Opponent guesses: " + botInput);
@@ -210,11 +190,12 @@ public class Game {
                     this.playgroundPlayer1.checkShipHitPoints(guessX, guessY);
                 }
                 this.renderer.render();
-                if (players[1].getCurrentScore() == 30) { //TODO make 30 the dynamic number of all tiles of all the ships in each Playground
+                if (players[1].getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
                     System.out.println("Congratulations " + players[0].getName() + ", you won!");
                     System.out.println("It took you " + players[0].getMovesTally() + " rounds to defeat your opponent.");
                     players[1].setPlayerTurn(false);
                     isPlaying = false;
+                    break;
                 }
                 System.out.println("");
                 players[0].setPlayerTurn(true);
@@ -222,6 +203,35 @@ public class Game {
         }
     }
 
+    private void selectFirstMove() throws InterruptedException {
+        int coinFlip = (int) (Math.random() * 9) + 1;
+        if (coinFlip <= 5) {
+            players[0].setPlayerTurn(true);
+            System.out.println("It's been randomly selected who gets the first move.");
+            Thread.sleep(1500);
+            System.out.println("It is " + players[0].getName() + " this time around.");
+            Thread.sleep(1500);
+        } else {
+            players[1].setPlayerTurn(true);
+            System.out.println("It's randomly selected who gets the first move.");
+            Thread.sleep(1500);
+            System.out.println("It is " + players[1].getName() + " this time around.");
+            Thread.sleep(2500);
+        }
+    }
+
+    private boolean checkIfMoveAlreadyMade(String input, Player player) {
+        if (player == players[0]) {
+            for (String st: this.movesPlayer1) {
+                return st.equals(input);
+            }
+        } else {
+            for (String st : this.movesPlayer2) {
+                return st.equals(input);
+            }
+        }
+        return false;
+    }
 
     private void setShips(Player player) throws InterruptedException {
         Scanner sc = new Scanner(System.in);
@@ -413,7 +423,6 @@ public class Game {
         }
         return true;
     }
-
 
 
 
