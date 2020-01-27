@@ -15,11 +15,13 @@ public class Bot {
         this.movesBot.add(newMove);
     }
 
+/*
     public int[] firstMove() {
         int x = 0;
         int y = 0;
         String lastMove = this.movesBot.get(this.movesBot.size() - 1);
 
     }
+*/
 
 }

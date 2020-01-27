@@ -7,14 +7,17 @@ public class Playground {
 
     private Field[][] map;
     private ArrayList<Ship> ships = new ArrayList<>();
+    private Player player;
 
-    Playground(ArrayList<Ship> ships) {
+    Playground(ArrayList<Ship> ships, Player player) {
         this.map = createNewArray();
         this.ships = ships;
+        this.player = player;
     }
 
-    Playground() {
+    Playground(Player player) {
         this.map = createNewArray();
+        this.player = player;
     }
 
     private Field[][] createNewArray() {
@@ -35,15 +38,21 @@ public class Playground {
         this.ships.add(ship);
     }
 
-    void checkShipHitPoints(int x, int y) throws InterruptedException {
+    void checkShipHitPoints(int x, int y, Player opponent) throws InterruptedException {
         for (Ship ship : this.ships) {
             if (ship.getValueBetweenX(ship).length != 0) {
                 if (Arrays.stream(ship.getValueBetweenX(ship)).anyMatch(e -> e == x) && ship.getStartRangeY() == y) {
                     ship.reduceHitPoints();
                     if (ship.getHitPoints() == 0) {
-                        System.out.println("Enemy " + ship.toString() + " has been destroyed.");
-                        Thread.sleep(2000);
-                        break;
+                        if (this.player == opponent) {
+                            System.out.println("Enemy " + ship.toString() + " has been destroyed.");
+                            Thread.sleep(2000);
+                            break;
+                        } else {
+                            System.out.println("Your " + ship.toString() + " has been destroyed.");
+                            Thread.sleep(2000);
+                            break;
+                        }
                     }
                     break;
                 }

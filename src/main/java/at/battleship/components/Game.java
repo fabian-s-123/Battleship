@@ -55,8 +55,8 @@ public class Game {
          */
 //        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1(player1);
 //        ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2(player2);
-//        this.playgroundPlayer1 = new Playground(shipsPlayer1);
-//        this.playgroundPlayer2 = new Playground(shipsPlayer2);
+//        this.playgroundPlayer1 = new Playground(shipsPlayer1, this.players[0]);
+//        this.playgroundPlayer2 = new Playground(shipsPlayer2, this.players[1]);
 //        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
 //
 //        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
@@ -68,8 +68,8 @@ public class Game {
          * set battlefield for player1 & randomly generated for bot
          */
 //        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1();
-//        this.playgroundPlayer1 = new Playground(shipsPlayer1);
-//        this.playgroundPlayer2 = new Playground();
+//        this.playgroundPlayer1 = new Playground(shipsPlayer1, this.players[0]);
+//        this.playgroundPlayer2 = new Playground(this.players[1]);
 //        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
 //
 //        //executes the setting of the ships for the bot in a separate thread
@@ -84,8 +84,8 @@ public class Game {
         /**
          * manual setting for player1 & randomly generated for bot
          */
-        this.playgroundPlayer1 = new Playground();
-        this.playgroundPlayer2 = new Playground();
+        this.playgroundPlayer1 = new Playground(this.players[0]);
+        this.playgroundPlayer2 = new Playground(this.players[1]);
         this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
 
         //executes the setting of the ships for the bot in a separate thread
@@ -191,7 +191,7 @@ public class Game {
                         System.exit(0);
                     } else {
                         //checks if the move has already been made
-                        moveAlreadyMade = this.checkIfMoveAlreadyMade(playerInput, players[0]);
+                        moveAlreadyMade = this.checkIfMoveAlreadyMade(playerInput, this.players[0]);
 
                         if (checkInput(playerInput) && playerInput.length() > 1 && !moveAlreadyMade) {
                             this.movesPlayer1.add(playerInput);
@@ -206,9 +206,9 @@ public class Game {
                 }
                 if (proceedWithAttack) {
                     Thread.sleep(800);
-                    this.players[0].setPlayerTurn(this.attackOpponent(guessX, guessY, players[0], this.playgroundPlayer2)); //attacks
+                    this.players[0].setPlayerTurn(this.attackOpponent(guessX, guessY, this.players[0], this.playgroundPlayer2)); //attacks
                     if (this.players[0].getPlayerTurn()) {
-                        this.playgroundPlayer2.checkShipHitPoints(guessX, guessY);
+                        this.playgroundPlayer2.checkShipHitPoints(guessX, guessY, this.players[1]);
                     }
                     this.renderer.render();
                     if (players[0].getCurrentScore() == this.playgroundPlayer1.checkMaxShipHitPointsCombined()) {
@@ -254,7 +254,7 @@ public class Game {
                 Thread.sleep(1500);
                 players[1].setPlayerTurn(this.attackOpponent(guessX, guessY, players[1], this.playgroundPlayer1)); //attacks
                 if (this.players[1].getPlayerTurn()) {
-                    this.playgroundPlayer1.checkShipHitPoints(guessX, guessY);
+                    this.playgroundPlayer1.checkShipHitPoints(guessX, guessY, this.players[0]);
                 }
                 this.renderer.render();
                 if (players[1].getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
@@ -271,10 +271,18 @@ public class Game {
     }
 
 
+    /**
+     * AI logic start
+     */
     private int[] testAI() {
-        int guessX = (int) (Math.random() * 9);
-        int guessY = (int) (Math.random() * 9);
-
+        //all successful moves are stored here
+        ArrayList<String> successfulMoves = new ArrayList<>();
+        //fills the list
+        for (String move : this.movesPlayer2) {
+            if (this.transformMovesToFieldRenderState(this.playgroundPlayer1, move) == Field.CurrentState.HIT) {
+                successfulMoves.add(move);
+            }
+        }
 
 
         String lastMove = this.movesPlayer2.get(this.movesPlayer2.size() - 1);
@@ -284,14 +292,16 @@ public class Game {
         int xNextMove = -1;
         int yNextMove = -1;
 
-        if (this.movesPlayer2.size() == 0) {
-            xNextMove = guessX;
-            yNextMove = guessY;
+        //if no move has been a HIT so far - the next move will be random
+        if (successfulMoves.size() == 0) {
+            xNextMove = (int) (Math.random() * 9);
+            yNextMove = (int) (Math.random() * 9);
+        } else {
+            int xLastSuccessfulMove = this.transformInputToXValue(successfulMoves.get(successfulMoves.size() - 1).charAt(0));
+            int yLastSuccessfulMove = this.transformInputToYValue(successfulMoves.get(successfulMoves.size() - 1).substring(1));
+
         }
 
-        for (String lastMoves: this.movesPlayer2) {
-            if (lastMove = Field.CurrentState)
-        }
 
         if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
 
@@ -326,7 +336,6 @@ public class Game {
             //case 9: last hit was on Y:9 && X:0 (9|0)
 
 
-
         }
         return new int[] {xNextMove, yNextMove};
     }
@@ -338,6 +347,41 @@ public class Game {
         return playground.getMap()[xLastMove][yLastMove].getFieldRenderState();
     }
 
+    private ArrayList<String> choosePotentialMoves(ArrayList<String> successfulMoves) {
+        ArrayList<String> potentialNextMoves = new ArrayList<>();
+        for (String move : successfulMoves) {
+            int xLastMove = this.transformInputToXValue(move.charAt(0));
+            int yLastMove = this.transformInputToYValue(move.substring(1));
+
+            //guess right
+            int xGuessRight =+ xLastMove;
+            char charXGuessRight = this.reverseTransformInputToXValue(xGuessRight);
+            String StringYGuessRight = this.reverseTransformInputToYValue(yLastMove);
+            potentialNextMoves.add(charXGuessRight + StringYGuessRight);
+
+            //guess left
+            int xGuessLeft =- xLastMove;
+            char charXGuessLeft = this.reverseTransformInputToXValue(xGuessLeft);
+            String StringYGuessLeft = this.reverseTransformInputToYValue(yLastMove);
+            potentialNextMoves.add(charXGuessLeft + StringYGuessLeft);
+
+            //guess top
+            int yGuessTop =- yLastMove;
+            char charXGuessTop = this.reverseTransformInputToXValue(xLastMove);
+            String StringYGuessTop = this.reverseTransformInputToYValue(yGuessTop);
+            potentialNextMoves.add(charXGuessTop + StringYGuessTop);
+
+            //guess bottom
+            int yGuessBottom =+ yLastMove;
+            char charXGuessBottom = this.reverseTransformInputToXValue(xLastMove);
+            String StringYGuessBottom = this.reverseTransformInputToYValue(yGuessBottom);
+            potentialNextMoves.add(charXGuessBottom + StringYGuessBottom);
+        }
+        return potentialNextMoves;
+    }
+    /**
+     * AI logic end
+     */
 
 
     private void verifyRange(Ship ship, Scanner sc) throws InterruptedException {
