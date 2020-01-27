@@ -6,19 +6,15 @@ import java.util.Arrays;
 public class Playground {
 
     private Field[][] map;
-    private ArrayList<Ship> ships;
-    private Player player;
+    private ArrayList<Ship> ships = new ArrayList<>();
 
-    //TODO delete this constructor after transitioning to manual placement of ships
-    Playground(ArrayList<Ship> ships, Player player) {
+    Playground(ArrayList<Ship> ships) {
         this.map = createNewArray();
         this.ships = ships;
-        this.player = player;
     }
 
-    Playground(Player player) {
+    Playground() {
         this.map = createNewArray();
-        this.player = player;
     }
 
     private Field[][] createNewArray() {
@@ -71,10 +67,6 @@ public class Playground {
             currentHitPointsCombined += ship.getLength(ship.getType());
         }
         return currentHitPointsCombined;
-    }
-
-    private void setPlayer(Player player) {
-        this.player = player;
     }
 
     int checkPosition(int posX, int posY) {

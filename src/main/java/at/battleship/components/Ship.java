@@ -20,6 +20,7 @@ public class Ship {
 
     Ship(Type type) {
         this.type = type;
+        this.hitPoints = type.length;
     }
 
     public enum Type {

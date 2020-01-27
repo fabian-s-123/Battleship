@@ -21,10 +21,11 @@ public class Game {
 
     public void play() throws InterruptedException {
         this.playIntro();
+        Thread.sleep(2000);
         if (players[0] != null && players[1] != null) {
             this.setBattlefield(this.players[0], this.players[1]);
             this.renderer.render();
-            this.playRoundStart();
+            this.playRounds();
         }
     }
 
@@ -45,7 +46,7 @@ public class Game {
         }
         Player player2 = createBotOpponent("Captain AngryMan");
         this.players[1] = player2;
-        System.out.println("Hello " + players[0].getName() + ", your opponent is: " + players[1].getName());
+        System.out.println("\nHello " + players[0].getName() + ", your opponent is: " + players[1].getName() + "\n");
     }
 
     private void setBattlefield(Player player1, Player player2) throws InterruptedException {
@@ -54,8 +55,8 @@ public class Game {
          */
 //        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1(player1);
 //        ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2(player2);
-//        this.playgroundPlayer1 = new Playground(shipsPlayer1, player1);
-//        this.playgroundPlayer2 = new Playground(shipsPlayer2, player2);
+//        this.playgroundPlayer1 = new Playground(shipsPlayer1);
+//        this.playgroundPlayer2 = new Playground(shipsPlayer2);
 //        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
 //
 //        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
@@ -66,14 +67,14 @@ public class Game {
         /**
          * set battlefield for player1 & randomly generated for bot
          */
-//        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1(player1);
-//        this.playgroundPlayer1 = new Playground(shipsPlayer1, player1);
-//        this.playgroundPlayer2 = new Playground(player2);
+//        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1();
+//        this.playgroundPlayer1 = new Playground(shipsPlayer1);
+//        this.playgroundPlayer2 = new Playground();
 //        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
 //
 //        //executes the setting of the ships for the bot in a separate thread
 //        ExecutorService executorService = Executors.newFixedThreadPool(10);
-//        executorService.execute(() -> setShipsForBot(player2));
+//        executorService.execute(this::setShipsForBot);
 //        executorService.shutdown();
 //
 //        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
@@ -83,154 +84,16 @@ public class Game {
         /**
          * manual setting for player1 & randomly generated for bot
          */
-        this.playgroundPlayer1 = new Playground(player1);
-        this.playgroundPlayer2 = new Playground(player2);
+        this.playgroundPlayer1 = new Playground();
+        this.playgroundPlayer2 = new Playground();
         this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
 
         //executes the setting of the ships for the bot in a separate thread
-        ExecutorService executorService = Executors.newFixedThreadPool(10);
-        executorService.execute(() -> setShipsForBot(player2));
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        executorService.execute(this::setShipsForBot);
         executorService.shutdown();
 
         this.setShips(player1);
-    }
-
-
-    private void playRoundStart() throws InterruptedException {
-        Scanner sc = new Scanner(System.in);
-        boolean isPlaying = true;
-
-        System.out.println("Press enter to start the game.");
-        String enter = sc.nextLine();
-        this.selectFirstMove();
-
-        //if currentScore of either Player hits 30 -> isPlaying = false;
-        while (isPlaying) {
-            //play round
-            while (players[0].getPlayerTurn()) {
-                String playerInput;
-                boolean moveAlreadyMade = false;
-                boolean proceedWithAttack = false;
-                int guessX = -1;
-                int guessY = -1;
-
-                do {
-                    this.players[0].addMovesTally();
-                    System.out.println("Your turn. Enter your guess:                    To exit enter 'e'");
-                    playerInput = sc.nextLine();
-                    //checks for exit
-                    if (playerInput.equals("e")) {
-                        System.out.println("Good bye.");
-                        System.exit(0);
-                    } else {
-                        //checks if the move has already been made
-                        moveAlreadyMade = this.checkIfMoveAlreadyMade(playerInput, players[0]);
-
-                        if (checkInput(playerInput) && playerInput.length() > 1 && !moveAlreadyMade) {
-                            this.movesPlayer1.add(playerInput);
-                            String playerInputToUpperCase = playerInput.toUpperCase();
-                            guessX = this.transformInputToXValue(playerInputToUpperCase.charAt(0));
-                            guessY = this.transformInputToYValue(playerInputToUpperCase.substring(1));
-                            proceedWithAttack = true;
-                        } else {
-                            System.out.println("Invalid input - try again:");
-                        }
-                    }
-                } while (moveAlreadyMade && !checkInput(playerInput));
-                if (proceedWithAttack) {
-                    Thread.sleep(800);
-                    this.players[0].setPlayerTurn(this.attackOpponent(guessX, guessY, players[0], this.playgroundPlayer2)); //attacks
-                    if (this.players[0].getPlayerTurn()) {
-                        this.playgroundPlayer2.checkShipHitPoints(guessX, guessY);
-                    }
-                    this.renderer.render();
-                    if (players[0].getCurrentScore() == this.playgroundPlayer1.checkMaxShipHitPointsCombined()) {
-                        System.out.println("Congratulations " + players[0].getName() + ", you won!");
-                        System.out.println("It took you " + players[0].getMovesTally() + " rounds to defeat your opponent.");
-                        players[0].setPlayerTurn(false);
-                        isPlaying = false;
-                        break;
-                    }
-                }
-            }
-            System.out.println("");
-            players[1].setPlayerTurn(true);
-
-
-            //play round bot opponent
-            while (players[1].getPlayerTurn()) {
-                Thread.sleep(200);
-                players[1].addMovesTally();
-                System.out.println(players[1].getName() + " is on the move...");
-                Thread.sleep(1000);
-
-                String botInput;
-                boolean moveAlreadyMade = false;
-                int guessX;
-                int guessY;
-
-                do {
-                    Thread.sleep(1000);
-                    guessX = (int) (Math.random() * 9);
-                    guessY = (int) (Math.random() * 9);
-
-                    char reverseX = this.reverseTransformInputToXValue(guessX);
-                    String reverseY = this.reverseTransformInputToYValue(guessY);
-                    botInput = reverseX + reverseY;
-
-                    //checks if the move has already been made
-                    moveAlreadyMade = this.checkIfMoveAlreadyMade(botInput, players[1]);
-
-                } while (moveAlreadyMade);
-                this.movesPlayer2.add(botInput);
-                System.out.println("Opponent guesses: " + botInput);
-                Thread.sleep(1500);
-                players[1].setPlayerTurn(this.attackOpponent(guessX, guessY, players[1], this.playgroundPlayer1)); //attacks
-                if (this.players[1].getPlayerTurn()) {
-                    this.playgroundPlayer1.checkShipHitPoints(guessX, guessY);
-                }
-                this.renderer.render();
-                if (players[1].getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
-                    System.out.println("Congratulations " + players[0].getName() + ", you won!");
-                    System.out.println("It took you " + players[0].getMovesTally() + " rounds to defeat your opponent.");
-                    players[1].setPlayerTurn(false);
-                    isPlaying = false;
-                    break;
-                }
-                System.out.println("");
-                players[0].setPlayerTurn(true);
-            }
-        }
-    }
-
-    private void selectFirstMove() throws InterruptedException {
-        int coinFlip = (int) (Math.random() * 9) + 1;
-        if (coinFlip <= 5) {
-            players[0].setPlayerTurn(true);
-            System.out.println("It's been randomly selected who gets the first move.");
-            Thread.sleep(1500);
-            System.out.println("It is " + players[0].getName() + " this time around.");
-            Thread.sleep(1500);
-        } else {
-            players[1].setPlayerTurn(true);
-            System.out.println("It's randomly selected who gets the first move.");
-            Thread.sleep(1500);
-            System.out.println("It is " + players[1].getName() + " this time around.");
-            Thread.sleep(2500);
-        }
-    }
-
-    private boolean checkIfMoveAlreadyMade(String input, Player player) {
-        if (player == players[0]) {
-            for (String st: this.movesPlayer1) {
-                return st.equals(input);
-            }
-        } else {
-            for (String st : this.movesPlayer2) {
-                return st.equals(input);
-            }
-        }
-        return false;
     }
 
     private void setShips(Player player) throws InterruptedException {
@@ -238,7 +101,7 @@ public class Game {
         System.out.println("First, set Your Ships: you have 1 Carrier (5x1), 2 Battleships (4x1), 3 Destroyer (3x1) & 4 Submarines (2x1).");
         System.out.println("Set the starting point of your Ships.");
         System.out.println("You can set them in the range from 'A-J' and from '1-10' and give them a direction, for example: C4 & down.");
-        System.out.println("Press enter to continue.");
+        System.out.println("\nPress enter to continue.");
 
         if (sc.nextLine().equals("")) {
             ArrayList<Ship> ships = this.createNonSetShipList();
@@ -262,12 +125,13 @@ public class Game {
                 }
                 this.verifyRange(ship, sc);
                 this.addShipToPlayground(ship, this.playgroundPlayer1);
+                this.renderer.renderOnePlayground(player);
             }
             System.out.println("The battlefield is set. Let's get into the game.\n\n");
         }
     }
 
-    private void setShipsForBot(Player player) {
+    private void setShipsForBot() {
         ArrayList<Ship> ships = this.createNonSetShipList();
         for (Ship ship : ships) {
             switch (ship.getType()) {
@@ -282,12 +146,140 @@ public class Game {
         }
     }
 
-    private void verifyRange(Ship ship, Scanner sc) {
+    private void selectFirstMove() throws InterruptedException {
+        int coinFlip = (int) (Math.random() * 9) + 1;
+        if (coinFlip <= 5) {
+            players[0].setPlayerTurn(true);
+            System.out.println("It's been randomly selected who gets the first move.");
+            Thread.sleep(1500);
+            System.out.println("It is " + players[0].getName() + " this time around.");
+            Thread.sleep(1500);
+        } else {
+            players[1].setPlayerTurn(true);
+            System.out.println("It's randomly selected who gets the first move.");
+            Thread.sleep(1500);
+            System.out.println("It is " + players[1].getName() + " this time around.");
+            Thread.sleep(2500);
+        }
+    }
+
+    private void playRounds() throws InterruptedException {
+        Scanner sc = new Scanner(System.in);
+        boolean isPlaying = true;
+
+        System.out.println("Press enter to start the game.");
+        String enter = sc.nextLine();
+        this.selectFirstMove();
+
+        //if currentScore of either Player hits 30 -> isPlaying = false;
+        while (isPlaying) {
+            //play round
+            while (players[0].getPlayerTurn()) {
+                String playerInput;
+                boolean moveAlreadyMade = true;
+                boolean proceedWithAttack = false;
+                int guessX = -1;
+                int guessY = -1;
+
+                while (moveAlreadyMade) {
+                    this.players[0].addMovesTally();
+                    System.out.println("Your turn. Enter your guess:                    To exit enter 'e'");
+                    playerInput = sc.nextLine();
+                    //checks for exit
+                    if (playerInput.equalsIgnoreCase("e")) {
+                        System.out.println("Good bye.");
+                        System.exit(0);
+                    } else {
+                        //checks if the move has already been made
+                        moveAlreadyMade = this.checkIfMoveAlreadyMade(playerInput, players[0]);
+
+                        if (checkInput(playerInput) && playerInput.length() > 1 && !moveAlreadyMade) {
+                            this.movesPlayer1.add(playerInput);
+                            String playerInputToUpperCase = playerInput.toUpperCase();
+                            guessX = this.transformInputToXValue(playerInputToUpperCase.charAt(0));
+                            guessY = this.transformInputToYValue(playerInputToUpperCase.substring(1));
+                            proceedWithAttack = true;
+                        } else {
+                            System.out.println("Invalid input - try again:");
+                        }
+                    }
+                }
+                if (proceedWithAttack) {
+                    Thread.sleep(800);
+                    this.players[0].setPlayerTurn(this.attackOpponent(guessX, guessY, players[0], this.playgroundPlayer2)); //attacks
+                    if (this.players[0].getPlayerTurn()) {
+                        this.playgroundPlayer2.checkShipHitPoints(guessX, guessY);
+                    }
+                    this.renderer.render();
+                    if (players[0].getCurrentScore() == this.playgroundPlayer1.checkMaxShipHitPointsCombined()) {
+                        System.out.println("Congratulations " + players[0].getName() + ", you won!");
+                        System.out.println("It took you " + players[0].getMovesTally() + " rounds to defeat your opponent.");
+                        players[0].setPlayerTurn(false);
+                        isPlaying = false;
+                    }
+                }
+            }
+            if (isPlaying) {
+                players[1].setPlayerTurn(true);
+            }
+
+
+            //play round bot opponent
+            while (players[1].getPlayerTurn()) {
+                Thread.sleep(200);
+                players[1].addMovesTally();
+                System.out.println(players[1].getName() + " is on the move...");
+                Thread.sleep(1000);
+
+                String botInput = "";
+                boolean moveAlreadyMade = true;
+                int guessX = -1;
+                int guessY = -1;
+
+                while (moveAlreadyMade) {
+                    Thread.sleep(1000);
+                    guessX = (int) (Math.random() * 9);
+                    guessY = (int) (Math.random() * 9);
+
+                    char reverseX = this.reverseTransformInputToXValue(guessX);
+                    String reverseY = this.reverseTransformInputToYValue(guessY);
+                    botInput = reverseX + reverseY;
+
+                    //checks if the move has already been made
+                    moveAlreadyMade = this.checkIfMoveAlreadyMade(botInput, players[1]);
+
+                }
+                this.movesPlayer2.add(botInput);
+                System.out.println("Opponent guesses: " + botInput);
+                Thread.sleep(1500);
+                players[1].setPlayerTurn(this.attackOpponent(guessX, guessY, players[1], this.playgroundPlayer1)); //attacks
+                if (this.players[1].getPlayerTurn()) {
+                    this.playgroundPlayer1.checkShipHitPoints(guessX, guessY);
+                }
+                this.renderer.render();
+                if (players[1].getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
+                    System.out.println("Congratulations " + players[0].getName() + ", you won!");
+                    System.out.println("It took you " + players[0].getMovesTally() + " rounds to defeat your opponent.");
+                    players[1].setPlayerTurn(false);
+                    isPlaying = false;
+                }
+                if (isPlaying) {
+                    players[0].setPlayerTurn(true);
+                }
+            }
+        }
+    }
+
+    private void verifyRange(Ship ship, Scanner sc) throws InterruptedException {
         boolean positionsVerified = false;
 
         while (!positionsVerified) {
-            System.out.println("Please enter your starting point:");
+            System.out.println("Please enter your starting point:               To exit enter 'e'");
             String input = sc.nextLine();
+            if (input.equalsIgnoreCase("e")) {
+                System.out.println("Good bye.");
+                System.exit(0);
+            }
             if (checkInput(input)) {
                 String toUpperCase = input.toUpperCase();
                 int validX = this.transformInputToXValue(toUpperCase.charAt(0));
@@ -340,6 +332,7 @@ public class Game {
             }
         }
         System.out.println("Ship has been placed.");
+        Thread.sleep(1000);
     }
 
     private void verifyRangeBot(Ship ship) {
@@ -391,7 +384,7 @@ public class Game {
     }
 
     private boolean rangeIsWithinBounds(int startingPoint, Ship ship) {
-        return startingPoint + ship.getLength(ship.getType()) <= 9;
+        return startingPoint -1 + ship.getLength(ship.getType()) <= 9;
     }
 
     private boolean checkForPositionCollision(Playground playground, LinkedList<Integer> values, int fixedPoint, boolean isX) {
@@ -423,6 +416,18 @@ public class Game {
         }
         return true;
     }
+
+
+    private boolean checkIfMoveAlreadyMade(String input, Player player) {
+        boolean moveAlreadyMade;
+        if (player == players[0]) {
+            moveAlreadyMade = this.movesPlayer1.stream().anyMatch(e -> e.toUpperCase().equals(input.toUpperCase()));
+        } else {
+            moveAlreadyMade = this.movesPlayer2.stream().anyMatch(e -> e.toUpperCase().equals(input.toUpperCase()));
+        }
+        return moveAlreadyMade;
+    }
+
 
 
 
@@ -528,8 +533,8 @@ public class Game {
     }
 
     private Player createBotOpponent(String name) {
-        return new Player(name, false, true, 0);
-    }    //TODO set isVisible to false after tests
+        return new Player(name, false, false, 0);
+    }
 
 
     private ArrayList<Ship> setShipsPlayer1(Player player1) {
