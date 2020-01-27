@@ -53,14 +53,14 @@ public class Game {
         /**
          * set battlefield for player1 & bot
          */
-//        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1(player1);
-//        ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2(player2);
-//        this.playgroundPlayer1 = new Playground(shipsPlayer1, this.players[0]);
-//        this.playgroundPlayer2 = new Playground(shipsPlayer2, this.players[1]);
-//        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
-//
-//        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
-//        this.addShipsToThePlayground(shipsPlayer2, this.playgroundPlayer2);
+        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1(player1);
+        ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2(player2);
+        this.playgroundPlayer1 = new Playground(shipsPlayer1, this.players[0]);
+        this.playgroundPlayer2 = new Playground(shipsPlayer2, this.players[1]);
+        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
+
+        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
+        this.addShipsToThePlayground(shipsPlayer2, this.playgroundPlayer2);
 
 
 
@@ -84,16 +84,16 @@ public class Game {
         /**
          * manual setting for player1 & randomly generated for bot
          */
-        this.playgroundPlayer1 = new Playground(this.players[0]);
-        this.playgroundPlayer2 = new Playground(this.players[1]);
-        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
-
-        //executes the setting of the ships for the bot in a separate thread
-        ExecutorService executorService = Executors.newFixedThreadPool(2);
-        executorService.execute(this::setShipsForBot);
-        executorService.shutdown();
-
-        this.setShips(player1);
+//        this.playgroundPlayer1 = new Playground(this.players[0]);
+//        this.playgroundPlayer2 = new Playground(this.players[1]);
+//        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
+//
+//        //executes the setting of the ships for the bot in a separate thread
+//        ExecutorService executorService = Executors.newFixedThreadPool(2);
+//        executorService.execute(this::setShipsForBot);
+//        executorService.shutdown();
+//
+//        this.setShips(player1);
     }
 
     private void setShips(Player player) throws InterruptedException {
@@ -167,11 +167,17 @@ public class Game {
         Scanner sc = new Scanner(System.in);
         boolean isPlaying = true;
 
+        /**
+         * delete after finishing bot AI
+         */
+        int count = 0;
+
+
         System.out.println("Press enter to start the game.");
         String enter = sc.nextLine();
         this.selectFirstMove();
 
-        //if currentScore of either Player hits 30 -> isPlaying = false;
+        //if currentScore of either Player hits number of all ship tiles combined -> isPlaying = false;
         while (isPlaying) {
             //play round
             while (players[0].getPlayerTurn()) {
@@ -237,13 +243,28 @@ public class Game {
                 int guessY = -1;
 
                 while (moveAlreadyMade) {
+
                     Thread.sleep(1000);
-                    guessX = (int) (Math.random() * 9);
-                    guessY = (int) (Math.random() * 9);
+                    int [] guesses = this.guessAI();
+                    guessX = guesses[0];
+                    guessY = guesses[1];
+
+                    /**
+                     * delete after finishing bot AI
+                     */
+                    if (count == 0) {
+                        guessX = 3;
+                        guessY = 3;
+                    }
 
                     char reverseX = this.reverseTransformInputToXValue(guessX);
                     String reverseY = this.reverseTransformInputToYValue(guessY);
                     botInput = reverseX + reverseY;
+
+                    /**
+                     * delete after finishing bot AI
+                     */
+                    count++;
 
                     //checks if the move has already been made
                     moveAlreadyMade = this.checkIfMoveAlreadyMade(botInput, players[1]);
@@ -254,7 +275,7 @@ public class Game {
                 Thread.sleep(1500);
                 players[1].setPlayerTurn(this.attackOpponent(guessX, guessY, players[1], this.playgroundPlayer1)); //attacks
                 if (this.players[1].getPlayerTurn()) {
-                    this.playgroundPlayer1.checkShipHitPoints(guessX, guessY, this.players[0]);
+                    this.playgroundPlayer1.checkShipHitPoints(guessX, guessY, this.players[1]);
                 }
                 this.renderer.render();
                 if (players[1].getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
@@ -274,7 +295,7 @@ public class Game {
     /**
      * AI logic start
      */
-    private int[] testAI() {
+    private int[] guessAI() {
         //all successful moves are stored here
         ArrayList<String> successfulMoves = new ArrayList<>();
         //fills the list from the current moves list
@@ -284,46 +305,52 @@ public class Game {
             }
         }
         //all potential moves are stored here
-        ArrayList<String> potentialMoves = new ArrayList<>();
+        ArrayList<String> potentialMoves;
         //fills the list with every field around a already successfully targeted field (=Field.CurrentState.HIT)
         potentialMoves = this.choosePotentialMoves(successfulMoves);
 
         //removes all invalid and already targeted fields (=Field.CurrentState.HIT & =Field.CurrentState.MISS)
-        for (String potMoves : potentialMoves) {
-            if (!checkInput(potMoves)) {
-                potentialMoves.remove(potMoves);
-                if (this.transformMovesToFieldRenderState(this.playgroundPlayer1, potMoves) == Field.CurrentState.MISS) {
-                    potentialMoves.remove(potMoves);
-                    if (this.transformMovesToFieldRenderState(this.playgroundPlayer1, potMoves) == Field.CurrentState.HIT) {
-                        potentialMoves.remove(potMoves);
-                    }
+        if (potentialMoves.size() != 0) {
+            for (int i = 0; i <= potentialMoves.size() - 1; i++) {
+                if (!checkInput(potentialMoves.get(i)) || this.transformMovesToFieldRenderState(this.playgroundPlayer1, potentialMoves.get(i)) == Field.CurrentState.MISS ||
+                        this.transformMovesToFieldRenderState(this.playgroundPlayer1, potentialMoves.get(i)) == Field.CurrentState.HIT) {
+                    potentialMoves.remove(potentialMoves.get(i));
+                    i--;
                 }
             }
         }
 
+        int xNextMove;
+        int yNextMove;
 
-        String lastMove = this.movesPlayer2.get(this.movesPlayer2.size() - 1);
-        int xLastMove = this.transformInputToXValue(lastMove.charAt(0));
-        int yLastMove = this.transformInputToYValue(lastMove.substring(1));
+        if (successfulMoves.size() == 0 || potentialMoves.size() == 0) {
+            xNextMove = (int) (Math.random() * 9);
+            yNextMove = (int) (Math.random() * 9);
+        } else {
+            double min = 0.5;
+            int max = potentialMoves.size() - 1;
+            int index = (int) ((Math.random() * max) + min);
+            xNextMove = this.transformInputToXValue(potentialMoves.get(index).charAt(0));
+            yNextMove = this.transformInputToYValue(potentialMoves.get(index).substring(1));
+        }
 
-        int xNextMove = -1;
-        int yNextMove = -1;
+
+//        String lastMove = this.movesPlayer2.get(this.movesPlayer2.size() - 1);
+//        int xLastMove = this.transformInputToXValue(lastMove.charAt(0));
+//        int yLastMove = this.transformInputToYValue(lastMove.substring(1));
 
         //if no move has been a HIT so far - the next move will be random
-        if (successfulMoves.size() == 0 || potentialMoves.size() == 0) {
+/*        if (successfulMoves.size() == 0 || potentialMoves.size() == 0) {
             xNextMove = (int) (Math.random() * 9);
             yNextMove = (int) (Math.random() * 9);
         } else {
             int xLastSuccessfulMove = this.transformInputToXValue(successfulMoves.get(successfulMoves.size() - 1).charAt(0));
             int yLastSuccessfulMove = this.transformInputToYValue(successfulMoves.get(successfulMoves.size() - 1).substring(1));
-
-        }
-
-        potentialMoves = this.choosePotentialMoves(successfulMoves);
+        }*/
 
 
 
-        if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
+/*        if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
 
             //case 1: last hit on X in field && Y in field (1-8|1-8)
             if (xLastMove + 1 <= 9 && xLastMove -1 >= 0 && yLastMove + 1 <= 9 && yLastMove - 1 >= 0) {
@@ -338,7 +365,7 @@ public class Game {
                 } else {
                     xNextMove = xLastMove + 1;
                 }
-            }
+            }*/
             //case 2: last hit was on X:0 && Y in field (0|1-8)
 
             //case 3: last hit was on X:9 && Y in field (9|1-8)
@@ -355,8 +382,6 @@ public class Game {
 
             //case 9: last hit was on Y:9 && X:0 (9|0)
 
-
-        }
         return new int[] {xNextMove, yNextMove};
     }
 
@@ -374,25 +399,25 @@ public class Game {
             int yLastMove = this.transformInputToYValue(move.substring(1));
 
             //guess right
-            int xGuessRight =+ xLastMove;
+            int xGuessRight = xLastMove + 1;
             char charXGuessRight = this.reverseTransformInputToXValue(xGuessRight);
             String StringYGuessRight = this.reverseTransformInputToYValue(yLastMove);
             potentialNextMoves.add(charXGuessRight + StringYGuessRight);
 
             //guess left
-            int xGuessLeft =- xLastMove;
+            int xGuessLeft = xLastMove - 1;
             char charXGuessLeft = this.reverseTransformInputToXValue(xGuessLeft);
             String StringYGuessLeft = this.reverseTransformInputToYValue(yLastMove);
             potentialNextMoves.add(charXGuessLeft + StringYGuessLeft);
 
             //guess top
-            int yGuessTop =- yLastMove;
+            int yGuessTop = yLastMove - 1;
             char charXGuessTop = this.reverseTransformInputToXValue(xLastMove);
             String StringYGuessTop = this.reverseTransformInputToYValue(yGuessTop);
             potentialNextMoves.add(charXGuessTop + StringYGuessTop);
 
             //guess bottom
-            int yGuessBottom =+ yLastMove;
+            int yGuessBottom = yLastMove + 1;
             char charXGuessBottom = this.reverseTransformInputToXValue(xLastMove);
             String StringYGuessBottom = this.reverseTransformInputToYValue(yGuessBottom);
             potentialNextMoves.add(charXGuessBottom + StringYGuessBottom);

@@ -44,7 +44,7 @@ public class Playground {
                 if (Arrays.stream(ship.getValueBetweenX(ship)).anyMatch(e -> e == x) && ship.getStartRangeY() == y) {
                     ship.reduceHitPoints();
                     if (ship.getHitPoints() == 0) {
-                        if (this.player == opponent) {
+                        if (this.player.equals(opponent)) {
                             System.out.println("Enemy " + ship.toString() + " has been destroyed.");
                             Thread.sleep(2000);
                             break;
@@ -60,9 +60,15 @@ public class Playground {
                 if (Arrays.stream(ship.getValueBetweenY(ship)).anyMatch(e -> e == y) && ship.getStartRangeX() == x) {
                     ship.reduceHitPoints();
                     if (ship.getHitPoints() == 0) {
-                        System.out.println("Enemy " + ship.toString() + " has been destroyed.");
-                        Thread.sleep(2000);
-                        break;
+                        if (this.player.equals(opponent)) {
+                            System.out.println("Enemy " + ship.toString() + " has been destroyed.");
+                            Thread.sleep(2000);
+                            break;
+                        } else {
+                            System.out.println("Your " + ship.toString() + " has been destroyed.");
+                            Thread.sleep(2000);
+                            break;
+                        }
                     }
                     break;
                 }
@@ -106,5 +112,13 @@ public class Playground {
 
     public Field[][] getMap() {
         return map;
+    }
+
+    public Player getPlayer() {
+        return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 }
