@@ -270,6 +270,76 @@ public class Game {
         }
     }
 
+
+    private int[] testAI() {
+        int guessX = (int) (Math.random() * 9);
+        int guessY = (int) (Math.random() * 9);
+
+
+
+        String lastMove = this.movesPlayer2.get(this.movesPlayer2.size() - 1);
+        int xLastMove = this.transformInputToXValue(lastMove.charAt(0));
+        int yLastMove = this.transformInputToYValue(lastMove.substring(1));
+
+        int xNextMove = -1;
+        int yNextMove = -1;
+
+        if (this.movesPlayer2.size() == 0) {
+            xNextMove = guessX;
+            yNextMove = guessY;
+        }
+
+        for (String lastMoves: this.movesPlayer2) {
+            if (lastMove = Field.CurrentState)
+        }
+
+        if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
+
+            //case 1: last hit on X in field && Y in field (1-8|1-8)
+            if (xLastMove + 1 <= 9 && xLastMove -1 >= 0 && yLastMove + 1 <= 9 && yLastMove - 1 >= 0) {
+                if (this.playgroundPlayer1.getMap()[xLastMove - 1][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
+                    xNextMove = xLastMove + 1;
+                } else if (this.playgroundPlayer1.getMap()[xLastMove + 1][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
+                    xNextMove = xLastMove - 1;
+                } else if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove - 1].getFieldRenderState() == Field.CurrentState.HIT) {
+                    yNextMove = yLastMove + 1;
+                } else if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove + 1].getFieldRenderState() == Field.CurrentState.HIT) {
+                    yNextMove = yLastMove - 1;
+                } else {
+                    xNextMove = xLastMove + 1;
+                }
+            }
+            //case 2: last hit was on X:0 && Y in field (0|1-8)
+
+            //case 3: last hit was on X:9 && Y in field (9|1-8)
+
+            //case 4: last hit was on Y:0 && X in field (1-8|0)
+
+            //case 5: last hit was on Y:9 && X in field (1-8|9)
+
+            //case 6: last hit was on X:0 && Y:0 (0|0)
+
+            //case 7: last hit was on X:9 && Y:9 (9|9)
+
+            //case 8: last hit was on X:0 && Y:9 (0|9)
+
+            //case 9: last hit was on Y:9 && X:0 (9|0)
+
+
+
+        }
+        return new int[] {xNextMove, yNextMove};
+    }
+
+    private Field.CurrentState transformMovesToFieldRenderState(Playground playground, String lastMove) {
+        int xLastMove = this.transformInputToXValue(lastMove.charAt(0));
+        int yLastMove = this.transformInputToYValue(lastMove.substring(1));
+
+        return playground.getMap()[xLastMove][yLastMove].getFieldRenderState();
+    }
+
+
+
     private void verifyRange(Ship ship, Scanner sc) throws InterruptedException {
         boolean positionsVerified = false;
 
