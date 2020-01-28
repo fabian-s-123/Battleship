@@ -252,8 +252,8 @@ public class Game {
                      * delete after finishing bot AI
                      */
                     if (count == 0) {
-                        guessX = 3;
-                        guessY = 3;
+                        guessX = 8;
+                        guessY = 7;
                     }
 
                     char reverseX = this.transformNumericInputOfXToStringValue(guessX);
@@ -276,14 +276,17 @@ public class Game {
                 if (this.players[1].getPlayerTurn()) {
                     this.playgroundPlayer1.checkShipHitPoints(guessX, guessY, this.players[1]);
                     shipDestroyedWithPreviousMove = this.playgroundPlayer1.isShipDestroyed();
+                } else {
+                    shipDestroyedWithPreviousMove = this.playgroundPlayer1.isShipDestroyed();
                 }
                 this.renderer.render();
-            }
-            if (players[1].getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
-                System.out.println("Congratulations " + players[0].getName() + ", you won!");
-                System.out.println("It took you " + players[0].getMovesTally() + " rounds to defeat your opponent.");
-                players[1].setPlayerTurn(false);
-                isPlaying = false;
+                players[1].setPlayerTurn(true);
+                if (players[1].getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
+                    System.out.println("Congratulations " + players[1].getName() + ", you won!");
+                    System.out.println("It took you " + players[1].getMovesTally() + " rounds to defeat your opponent.");
+                    players[1].setPlayerTurn(false);
+                    isPlaying = false;
+                }
             }
             if (isPlaying) {
                 players[0].setPlayerTurn(true);
@@ -305,17 +308,12 @@ public class Game {
             }
         }
 
-        ArrayList<String> fieldsStillAvailableForBombing = this.fieldsAvailableForBot;
-        for (String field : this.fieldsAvailableForBot) {
-            if (this.movesPlayer2.contains(field)) {
-                fieldsStillAvailableForBombing.remove(field);
-            }
-        }
+        //all fields that have not been bombed yet
+        ArrayList<String> fieldsStillAvailableForBombing = this.getFieldsAvailableForBombing();
 
-        int xNextMove = -1;
-        int yNextMove = -1;
+        int xNextMove;
+        int yNextMove;
 
-        // && successfulMoves.get(successfulMoves.size() - 1).equals(this.movesPlayer2.get(this.movesPlayer2.size() - 1))
         /**
          * if no ship has been destroyed with previous hit, go for standard logic of trying to find a line of previous hits
          * and move along that coordinate
@@ -323,9 +321,9 @@ public class Game {
         if (!shipDestroyed) {
 
             ArrayList<String> potentialMoves; //all potential moves are stored here
-            potentialMoves = this.choosePotentialMoves(successfulMoves); //fills the list with every field around a already successfully targeted field (=Field.CurrentState.HIT)
+            potentialMoves = this.choosePotentialMoves(successfulMoves); //fills the list with every field around a already successfully targeted field ( = Field.CurrentState.HIT)
 
-            //checks if last successful moves were on the same X or Y coordinate
+            //checks if last successful moves were on the same X or Y coordinate -> if so, use this pattern for the next guess
             char potentialX = 'z';
             String potentialY = "";
             if (successfulMoves.size() >= 2) {
@@ -342,7 +340,7 @@ public class Game {
                 }
             }
 
-            //removes all invalid and already targeted fields (=Field.CurrentState.HIT & =Field.CurrentState.MISS)
+            //removes all invalid and already targeted fields ( = Field.CurrentState.HIT & =Field.CurrentState.MISS)
             if (potentialMoves.size() != 0) {
                 for (int i = 0; i <= potentialMoves.size() - 1; i++) {
                     if (!checkInput(potentialMoves.get(i)) || !fieldsStillAvailableForBombing.contains(potentialMoves.get(i))) {
@@ -352,27 +350,41 @@ public class Game {
                 }
             }
 
-            //leaves only potential moves in the list which align with previous hits in coordinate
+            //leaves only potential moves in the list which align with previous hits on the same coordinate
             if (potentialX != 'z') {
                 char finalPotentialX = potentialX;
                 potentialMoves = (ArrayList<String>) potentialMoves.stream()
                         .filter(e -> e.charAt(0) == finalPotentialX)
+                        .filter(e -> (int) e.charAt(0) != (int) e.charAt(0) - 1)
+                        .filter(e -> (int) e.charAt(0) != (int) e.charAt(0) + 1)
                         .collect(Collectors.toList());
             } else if (potentialY.length() > 0) {
                 String finalPotentialY = potentialY;
                 potentialMoves = (ArrayList<String>) potentialMoves.stream()
                         .filter(e -> e.substring(1).equals(finalPotentialY))
+                        .filter(e -> (int) e.charAt(0) != (int) e.charAt(0) - 1)
+                        .filter(e -> (int) e.charAt(0) != (int) e.charAt(0) + 1)
                         .collect(Collectors.toList());
             }
 
-            if (potentialMoves.size() == 0 || successfulMoves.size() >= 5 && !this.checkTheLastThreeMoves(successfulMoves) ||
-                    this.players[1].getMovesTally() > 60 && successfulMoves.size() >= 5 && !this.checkTheLastThreeMoves(successfulMoves)) {
+            if (potentialMoves.size() == 0 || successfulMoves.size() >= 5 && !this.checkLastFourMoves(successfulMoves) ||
+                    this.players[1].getMovesTally() > 60 && successfulMoves.size() >= 5 && !this.checkLastFourMoves(successfulMoves)) {
+
+                //TODO hohoo
+                //if first try does not have any viable neighbours left -> re-rolls the random number
                 double randomIndexMin = 0.5;
                 int randomIndexMax = fieldsStillAvailableForBombing.size();
                 int randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
 
-                xNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).charAt(0));
-                yNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).substring(1));
+                if (this.neighboursStillViableForBombing(fieldsStillAvailableForBombing.get(randomIndex), fieldsStillAvailableForBombing) > 0) {
+                    xNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).charAt(0));
+                    yNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).substring(1));
+                } else {
+                    randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
+                    xNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).charAt(0));
+                    yNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).substring(1));
+                }
+
             } else {
                 double min = 0.5;
                 int max = potentialMoves.size() - 1;
@@ -405,45 +417,67 @@ public class Game {
     private ArrayList<String> choosePotentialMoves(ArrayList<String> successfulMoves) {
         ArrayList<String> potentialNextMoves = new ArrayList<>();
         for (String move : successfulMoves) {
-            int xLastMove = this.transformStringInputToXValue(move.charAt(0));
-            int yLastMove = this.transformStringInputToXValue(move.substring(1));
-
-            //guess right
-            int xGuessRight = xLastMove + 1;
-            char charXGuessRight = this.transformNumericInputOfXToStringValue(xGuessRight);
-            String StringYGuessRight = this.transformNumericInputOfYToStringValue(yLastMove);
-            potentialNextMoves.add(charXGuessRight + StringYGuessRight);
-
-            //guess left
-            int xGuessLeft = xLastMove - 1;
-            char charXGuessLeft = this.transformNumericInputOfXToStringValue(xGuessLeft);
-            String StringYGuessLeft = this.transformNumericInputOfYToStringValue(yLastMove);
-            potentialNextMoves.add(charXGuessLeft + StringYGuessLeft);
-
-            //guess top
-            int yGuessTop = yLastMove - 1;
-            char charXGuessTop = this.transformNumericInputOfXToStringValue(xLastMove);
-            String StringYGuessTop = this.transformNumericInputOfYToStringValue(yGuessTop);
-            potentialNextMoves.add(charXGuessTop + StringYGuessTop);
-
-            //guess bottom
-            int yGuessBottom = yLastMove + 1;
-            char charXGuessBottom = this.transformNumericInputOfXToStringValue(xLastMove);
-            String StringYGuessBottom = this.transformNumericInputOfYToStringValue(yGuessBottom);
-            potentialNextMoves.add(charXGuessBottom + StringYGuessBottom);
+            potentialNextMoves.add(this.getFieldNeighbours(move).get(0));
+            potentialNextMoves.add(this.getFieldNeighbours(move).get(1));
+            potentialNextMoves.add(this.getFieldNeighbours(move).get(2));
+            potentialNextMoves.add(this.getFieldNeighbours(move).get(3));
         }
         return potentialNextMoves;
     }
 
-    private boolean checkTheLastThreeMoves(ArrayList<String> successfulMoves) {
-        boolean lastThreeMovesSuccessful = false;
-        for (int i = this.movesPlayer2.size() - 1; i > this.movesPlayer2.size() - 4; i--) {
+    private ArrayList<String> getFieldNeighbours(String field) {
+        ArrayList<String> fieldNeighbours = new ArrayList<>();
+        int xField = this.transformStringInputToXValue(field.charAt(0));
+        int yField = this.transformStringInputToXValue(field.substring(1));
+
+        //neighbour right
+        int xNeighbourRight = xField + 1;
+        char xNeighbourRightAsChar = this.transformNumericInputOfXToStringValue(xNeighbourRight);
+        String yNeighbourRightAsString = this.transformNumericInputOfYToStringValue(yField);
+        fieldNeighbours.add(xNeighbourRightAsChar + yNeighbourRightAsString);
+
+        //neighbour left
+        int xNeighbourLeft = xField - 1;
+        char xNeighbourLeftAsChar = this.transformNumericInputOfXToStringValue(xNeighbourLeft);
+        String yNeighbourLeftAsString = this.transformNumericInputOfYToStringValue(yField);
+        fieldNeighbours.add(xNeighbourLeftAsChar + yNeighbourLeftAsString);
+
+        //neighbour top
+        int yNeighbourTop = yField - 1;
+        char xNeighbourTopAsChar = this.transformNumericInputOfXToStringValue(xField);
+        String yNeighbourTopAsString = this.transformNumericInputOfYToStringValue(yNeighbourTop);
+        fieldNeighbours.add(xNeighbourTopAsChar + yNeighbourTopAsString);
+
+        //neighbour bottom
+        int yNeighbourBottom = yField + 1;
+        char xNeighbourBottomAsChar = this.transformNumericInputOfXToStringValue(xField);
+        String yNeighbourBottomAsString = this.transformNumericInputOfYToStringValue(yNeighbourBottom);
+        fieldNeighbours.add(xNeighbourBottomAsChar + yNeighbourBottomAsString);
+
+        return fieldNeighbours;
+    }
+
+    private int neighboursStillViableForBombing(String field, ArrayList<String> fieldsAvailableForBombing) {
+        int neighboursAvailable = 0;
+        ArrayList<String> neighbours = this.getFieldNeighbours(field);
+        for (String neighbour : neighbours) {
+            if (fieldsAvailableForBombing.contains(neighbour)) {
+                neighboursAvailable++;
+            }
+        }
+        return neighboursAvailable;
+    }
+
+
+    private boolean checkLastFourMoves(ArrayList<String> successfulMoves) {
+        boolean lastFourMovesSuccessful = false;
+        for (int i = this.movesPlayer2.size() - 1; i > this.movesPlayer2.size() - 5; i--) {
             if (successfulMoves.contains(this.movesPlayer2.get(i))) {
-                lastThreeMovesSuccessful = true;
+                lastFourMovesSuccessful = true;
                 break;
             }
         }
-        return lastThreeMovesSuccessful;
+        return lastFourMovesSuccessful;
     }
 
     private ArrayList<String> getAllFields() {
@@ -457,6 +491,17 @@ public class Game {
         }
         return allFields;
     }
+
+    private ArrayList<String> getFieldsAvailableForBombing() {
+        ArrayList<String> fieldsStillAvailableForBombing = new ArrayList<>(this.fieldsAvailableForBot);
+        for (String field : this.fieldsAvailableForBot) {
+            if (this.movesPlayer2.contains(field)) {
+                fieldsStillAvailableForBombing.remove(field);
+            }
+        }
+        return fieldsStillAvailableForBombing;
+    }
+
     /**
      * AI logic end
      */

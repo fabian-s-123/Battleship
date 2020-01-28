@@ -94,8 +94,9 @@ public class Playground {
                             this.shipDestroyed = true;
                             break;
                         }
+                    } else {
+                        this.shipDestroyed = false;
                     }
-                    this.shipDestroyed = false;
                     break;
                 }
             }
