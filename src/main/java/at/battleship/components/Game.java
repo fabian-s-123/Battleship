@@ -7,6 +7,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 public class Game {
 
@@ -63,7 +64,6 @@ public class Game {
         this.addShipsToThePlayground(shipsPlayer2, this.playgroundPlayer2);
 
 
-
         /**
          * set battlefield for player1 & randomly generated for bot
          */
@@ -78,7 +78,6 @@ public class Game {
 //        executorService.shutdown();
 //
 //        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
-
 
 
         /**
@@ -166,6 +165,7 @@ public class Game {
     private void playRounds() throws InterruptedException {
         Scanner sc = new Scanner(System.in);
         boolean isPlaying = true;
+        boolean shipDestroyedWithPreviousMove = false;
 
         /**
          * delete after finishing bot AI
@@ -245,7 +245,7 @@ public class Game {
                 while (moveAlreadyMade) {
 
                     Thread.sleep(1000);
-                    int [] guesses = this.guessAI();
+                    int[] guesses = this.guessAI(shipDestroyedWithPreviousMove);
                     guessX = guesses[0];
                     guessY = guesses[1];
 
@@ -276,17 +276,18 @@ public class Game {
                 players[1].setPlayerTurn(this.attackOpponent(guessX, guessY, players[1], this.playgroundPlayer1)); //attacks
                 if (this.players[1].getPlayerTurn()) {
                     this.playgroundPlayer1.checkShipHitPoints(guessX, guessY, this.players[1]);
+                    shipDestroyedWithPreviousMove = this.playgroundPlayer1.isShipDestroyed();
                 }
                 this.renderer.render();
-                if (players[1].getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
-                    System.out.println("Congratulations " + players[0].getName() + ", you won!");
-                    System.out.println("It took you " + players[0].getMovesTally() + " rounds to defeat your opponent.");
-                    players[1].setPlayerTurn(false);
-                    isPlaying = false;
-                }
-                if (isPlaying) {
-                    players[0].setPlayerTurn(true);
-                }
+            }
+            if (players[1].getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
+                System.out.println("Congratulations " + players[0].getName() + ", you won!");
+                System.out.println("It took you " + players[0].getMovesTally() + " rounds to defeat your opponent.");
+                players[1].setPlayerTurn(false);
+                isPlaying = false;
+            }
+            if (isPlaying) {
+                players[0].setPlayerTurn(true);
             }
         }
     }
@@ -295,7 +296,7 @@ public class Game {
     /**
      * AI logic start
      */
-    private int[] guessAI() {
+    private int[] guessAI(boolean shipDestroyed) {
         //all successful moves are stored here
         ArrayList<String> successfulMoves = new ArrayList<>();
         //fills the list from the current moves list
@@ -320,69 +321,64 @@ public class Game {
             }
         }
 
-        int xNextMove;
-        int yNextMove;
+        int xNextMove = -1;
+        int yNextMove = -1;
 
-        if (successfulMoves.size() == 0 || potentialMoves.size() == 0) {
+        // && successfulMoves.get(successfulMoves.size() - 1).equals(this.movesPlayer2.get(this.movesPlayer2.size() - 1))
+        /**
+         * if no ship has been destroyed with previous hit, go for standard logic of trying to find a line of previous hits
+         * and move along that coordinate
+         */
+        if (!shipDestroyed) {
+            //checks if last successful moves were on the same X or Y coordinate
+            char potentialX = 'z';
+            String potentialY = "";
+            if (successfulMoves.size() >= 2) {
+                for (int i = successfulMoves.size() - 1; i >= 1; i--) {
+                    for (int j = successfulMoves.size() - 2; j >= 0; j--) {
+                        if (successfulMoves.get(i).charAt(0) == successfulMoves.get(j).charAt(0)) {
+                            potentialX = successfulMoves.get(0).charAt(0);
+                            break;
+                        } else if (successfulMoves.get(i).substring(1).equals(successfulMoves.get(j).substring(1))) {
+                            potentialY = successfulMoves.get(i).substring(1);
+                            break;
+                        }
+                    }
+                }
+            } else if ()
+            //leaves only potential moves in the list which align with previous hits in coordinate
+            if (potentialX != 'z') {
+                char finalPotentialX = potentialX;
+                potentialMoves = (ArrayList<String>) potentialMoves.stream()
+                        .filter(e -> e.charAt(0) == finalPotentialX)
+                        .collect(Collectors.toList());
+            } else if (potentialY.length() > 0) {
+                String finalPotentialY = potentialY;
+                potentialMoves = (ArrayList<String>) potentialMoves.stream()
+                        .filter(e -> e.substring(1).equals(finalPotentialY))
+                        .collect(Collectors.toList());
+            }
+
+            if (potentialMoves.size() == 0 || successfulMoves.size() >= 5 && !this.checkTheLastThreeTries(successfulMoves) ||
+                    this.players[1].getMovesTally() > 60 && successfulMoves.size() >= 5 && !this.checkTheLastThreeTries(successfulMoves)) {
+                xNextMove = (int) (Math.random() * 9);
+                yNextMove = (int) (Math.random() * 9);
+            } else {
+                double min = 0.5;
+                int max = potentialMoves.size() - 1;
+                int index = (int) ((Math.random() * max) + min);
+                xNextMove = this.transformInputToXValue(potentialMoves.get(index).charAt(0));
+                yNextMove = this.transformInputToYValue(potentialMoves.get(index).substring(1));
+            }
+        } else {
             xNextMove = (int) (Math.random() * 9);
             yNextMove = (int) (Math.random() * 9);
-        } else {
-            double min = 0.5;
-            int max = potentialMoves.size() - 1;
-            int index = (int) ((Math.random() * max) + min);
-            xNextMove = this.transformInputToXValue(potentialMoves.get(index).charAt(0));
-            yNextMove = this.transformInputToYValue(potentialMoves.get(index).substring(1));
         }
 
+        successfulMoves.clear();
+        potentialMoves.clear();
 
-//        String lastMove = this.movesPlayer2.get(this.movesPlayer2.size() - 1);
-//        int xLastMove = this.transformInputToXValue(lastMove.charAt(0));
-//        int yLastMove = this.transformInputToYValue(lastMove.substring(1));
-
-        //if no move has been a HIT so far - the next move will be random
-/*        if (successfulMoves.size() == 0 || potentialMoves.size() == 0) {
-            xNextMove = (int) (Math.random() * 9);
-            yNextMove = (int) (Math.random() * 9);
-        } else {
-            int xLastSuccessfulMove = this.transformInputToXValue(successfulMoves.get(successfulMoves.size() - 1).charAt(0));
-            int yLastSuccessfulMove = this.transformInputToYValue(successfulMoves.get(successfulMoves.size() - 1).substring(1));
-        }*/
-
-
-
-/*        if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
-
-            //case 1: last hit on X in field && Y in field (1-8|1-8)
-            if (xLastMove + 1 <= 9 && xLastMove -1 >= 0 && yLastMove + 1 <= 9 && yLastMove - 1 >= 0) {
-                if (this.playgroundPlayer1.getMap()[xLastMove - 1][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
-                    xNextMove = xLastMove + 1;
-                } else if (this.playgroundPlayer1.getMap()[xLastMove + 1][yLastMove].getFieldRenderState() == Field.CurrentState.HIT) {
-                    xNextMove = xLastMove - 1;
-                } else if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove - 1].getFieldRenderState() == Field.CurrentState.HIT) {
-                    yNextMove = yLastMove + 1;
-                } else if (this.playgroundPlayer1.getMap()[xLastMove][yLastMove + 1].getFieldRenderState() == Field.CurrentState.HIT) {
-                    yNextMove = yLastMove - 1;
-                } else {
-                    xNextMove = xLastMove + 1;
-                }
-            }*/
-            //case 2: last hit was on X:0 && Y in field (0|1-8)
-
-            //case 3: last hit was on X:9 && Y in field (9|1-8)
-
-            //case 4: last hit was on Y:0 && X in field (1-8|0)
-
-            //case 5: last hit was on Y:9 && X in field (1-8|9)
-
-            //case 6: last hit was on X:0 && Y:0 (0|0)
-
-            //case 7: last hit was on X:9 && Y:9 (9|9)
-
-            //case 8: last hit was on X:0 && Y:9 (0|9)
-
-            //case 9: last hit was on Y:9 && X:0 (9|0)
-
-        return new int[] {xNextMove, yNextMove};
+        return new int[]{xNextMove, yNextMove};
     }
 
     private Field.CurrentState transformMovesToFieldRenderState(Playground playground, String lastMove) {
@@ -424,6 +420,18 @@ public class Game {
         }
         return potentialNextMoves;
     }
+
+    private boolean checkTheLastThreeTries(ArrayList<String> successfulMoves) {
+        boolean lastThreeTriesSuccessful = false;
+        for (int i = this.movesPlayer2.size() - 1; i > this.movesPlayer2.size() - 4; i--) {
+            if (successfulMoves.contains(this.movesPlayer2.get(i))) {
+                lastThreeTriesSuccessful = true;
+                break;
+            }
+        }
+        return lastThreeTriesSuccessful;
+    }
+
     /**
      * AI logic end
      */
@@ -543,7 +551,7 @@ public class Game {
     }
 
     private boolean rangeIsWithinBounds(int startingPoint, Ship ship) {
-        return startingPoint -1 + ship.getLength(ship.getType()) <= 9;
+        return startingPoint - 1 + ship.getLength(ship.getType()) <= 9;
     }
 
     private boolean checkForPositionCollision(Playground playground, LinkedList<Integer> values, int fixedPoint, boolean isX) {
@@ -586,8 +594,6 @@ public class Game {
         }
         return moveAlreadyMade;
     }
-
-
 
 
     private ArrayList<Ship> createNonSetShipList() {

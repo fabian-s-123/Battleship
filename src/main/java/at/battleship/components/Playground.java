@@ -8,6 +8,7 @@ public class Playground {
     private Field[][] map;
     private ArrayList<Ship> ships = new ArrayList<>();
     private Player player;
+    private boolean shipDestroyed = false;
 
     Playground(ArrayList<Ship> ships, Player player) {
         this.map = createNewArray();
@@ -38,7 +39,26 @@ public class Playground {
         this.ships.add(ship);
     }
 
+//    int[] getDamagedShips() {
+//        int[] damagedFields = new int[]{};
+//        Ship damagedShip = this.ships.stream().
+//                filter(e -> e.getHitPoints() != e.getLength(e.getType()))
+//                .findFirst()
+//                .get();
+//        if (damagedShip.getLength(damagedShip.getType()) - damagedShip.getHitPoints() >= 2) {
+//            if (damagedShip.getValueBetweenX(damagedShip).length == 0) {
+//                damagedFields = damagedShip.getValueBetweenY(damagedShip);
+//            } else {
+//                damagedFields = damagedShip.getValueBetweenX(damagedShip);
+//            }
+//        } else
+//        return damagedFields;
+//    }
+
+
+
     void checkShipHitPoints(int x, int y, Player opponent) throws InterruptedException {
+        boolean shipDestroyed = false;
         for (Ship ship : this.ships) {
             if (ship.getValueBetweenX(ship).length != 0) {
                 if (Arrays.stream(ship.getValueBetweenX(ship)).anyMatch(e -> e == x) && ship.getStartRangeY() == y) {
@@ -47,13 +67,16 @@ public class Playground {
                         if (this.player.equals(opponent)) {
                             System.out.println("Enemy " + ship.toString() + " has been destroyed.");
                             Thread.sleep(2000);
+                            this.shipDestroyed = true;
                             break;
                         } else {
                             System.out.println("Your " + ship.toString() + " has been destroyed.");
                             Thread.sleep(2000);
+                            this.shipDestroyed = true;
                             break;
                         }
                     }
+                    this.shipDestroyed = false;
                     break;
                 }
             } else {
@@ -63,13 +86,16 @@ public class Playground {
                         if (this.player.equals(opponent)) {
                             System.out.println("Enemy " + ship.toString() + " has been destroyed.");
                             Thread.sleep(2000);
+                            this.shipDestroyed = true;
                             break;
                         } else {
                             System.out.println("Your " + ship.toString() + " has been destroyed.");
                             Thread.sleep(2000);
+                            this.shipDestroyed = true;
                             break;
                         }
                     }
+                    this.shipDestroyed = false;
                     break;
                 }
             }
@@ -120,5 +146,9 @@ public class Playground {
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+    public boolean isShipDestroyed() {
+        return shipDestroyed;
     }
 }
