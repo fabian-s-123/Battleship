@@ -3,8 +3,6 @@ package at.battleship.components;
 import at.battleship.services.Renderer;
 
 import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -16,6 +14,7 @@ public class Game {
     private Playground playgroundPlayer2;
     private ArrayList<String> movesPlayer1 = new ArrayList<>();
     private ArrayList<String> movesPlayer2 = new ArrayList<>();
+    private ArrayList<String> fieldsAvailableForBot = this.getAllFields();
     private Renderer renderer;
     private static final Pattern SHIP_POSITION_PATTERN = Pattern.compile("^([a-jA-J])+(10|[1-9])$");
 
@@ -202,8 +201,8 @@ public class Game {
                         if (checkInput(playerInput) && playerInput.length() > 1 && !moveAlreadyMade) {
                             this.movesPlayer1.add(playerInput);
                             String playerInputToUpperCase = playerInput.toUpperCase();
-                            guessX = this.transformInputToXValue(playerInputToUpperCase.charAt(0));
-                            guessY = this.transformInputToYValue(playerInputToUpperCase.substring(1));
+                            guessX = this.transformStringInputToXValue(playerInputToUpperCase.charAt(0));
+                            guessY = this.transformStringInputToXValue(playerInputToUpperCase.substring(1));
                             proceedWithAttack = true;
                         } else {
                             System.out.println("Invalid input - try again:");
@@ -257,8 +256,8 @@ public class Game {
                         guessY = 3;
                     }
 
-                    char reverseX = this.reverseTransformInputToXValue(guessX);
-                    String reverseY = this.reverseTransformInputToYValue(guessY);
+                    char reverseX = this.transformNumericInputOfXToStringValue(guessX);
+                    String reverseY = this.transformNumericInputOfYToStringValue(guessY);
                     botInput = reverseX + reverseY;
 
                     /**
@@ -305,19 +304,11 @@ public class Game {
                 successfulMoves.add(move);
             }
         }
-        //all potential moves are stored here
-        ArrayList<String> potentialMoves;
-        //fills the list with every field around a already successfully targeted field (=Field.CurrentState.HIT)
-        potentialMoves = this.choosePotentialMoves(successfulMoves);
 
-        //removes all invalid and already targeted fields (=Field.CurrentState.HIT & =Field.CurrentState.MISS)
-        if (potentialMoves.size() != 0) {
-            for (int i = 0; i <= potentialMoves.size() - 1; i++) {
-                if (!checkInput(potentialMoves.get(i)) || this.transformMovesToFieldRenderState(this.playgroundPlayer1, potentialMoves.get(i)) == Field.CurrentState.MISS ||
-                        this.transformMovesToFieldRenderState(this.playgroundPlayer1, potentialMoves.get(i)) == Field.CurrentState.HIT) {
-                    potentialMoves.remove(potentialMoves.get(i));
-                    i--;
-                }
+        ArrayList<String> fieldsStillAvailableForBombing = this.fieldsAvailableForBot;
+        for (String field : this.fieldsAvailableForBot) {
+            if (this.movesPlayer2.contains(field)) {
+                fieldsStillAvailableForBombing.remove(field);
             }
         }
 
@@ -330,22 +321,37 @@ public class Game {
          * and move along that coordinate
          */
         if (!shipDestroyed) {
+
+            ArrayList<String> potentialMoves; //all potential moves are stored here
+            potentialMoves = this.choosePotentialMoves(successfulMoves); //fills the list with every field around a already successfully targeted field (=Field.CurrentState.HIT)
+
             //checks if last successful moves were on the same X or Y coordinate
             char potentialX = 'z';
             String potentialY = "";
             if (successfulMoves.size() >= 2) {
-                for (int i = successfulMoves.size() - 1; i >= 1; i--) {
-                    for (int j = successfulMoves.size() - 2; j >= 0; j--) {
-                        if (successfulMoves.get(i).charAt(0) == successfulMoves.get(j).charAt(0)) {
-                            potentialX = successfulMoves.get(0).charAt(0);
-                            break;
-                        } else if (successfulMoves.get(i).substring(1).equals(successfulMoves.get(j).substring(1))) {
-                            potentialY = successfulMoves.get(i).substring(1);
-                            break;
-                        }
+                int indexTop = successfulMoves.size() - 1;
+                int indexBelowTop = successfulMoves.size() - 2;
+                if (successfulMoves.get(indexTop).charAt(0) == successfulMoves.get(indexBelowTop).charAt(0)) {
+                    potentialX = successfulMoves.get(0).charAt(0);
+                } else if (successfulMoves.get(indexTop).substring(1).equals(successfulMoves.get(indexBelowTop).substring(1))) {
+                    potentialY = successfulMoves.get(indexTop).substring(1);
+                } else {
+                    ArrayList<String> lastSuccessfulMove = new ArrayList<>();
+                    lastSuccessfulMove.add(successfulMoves.get(indexTop));
+                    potentialMoves = this.choosePotentialMoves(lastSuccessfulMove);
+                }
+            }
+
+            //removes all invalid and already targeted fields (=Field.CurrentState.HIT & =Field.CurrentState.MISS)
+            if (potentialMoves.size() != 0) {
+                for (int i = 0; i <= potentialMoves.size() - 1; i++) {
+                    if (!checkInput(potentialMoves.get(i)) || !fieldsStillAvailableForBombing.contains(potentialMoves.get(i))) {
+                        potentialMoves.remove(potentialMoves.get(i));
+                        i--;
                     }
                 }
-            } else if ()
+            }
+
             //leaves only potential moves in the list which align with previous hits in coordinate
             if (potentialX != 'z') {
                 char finalPotentialX = potentialX;
@@ -359,31 +365,39 @@ public class Game {
                         .collect(Collectors.toList());
             }
 
-            if (potentialMoves.size() == 0 || successfulMoves.size() >= 5 && !this.checkTheLastThreeTries(successfulMoves) ||
-                    this.players[1].getMovesTally() > 60 && successfulMoves.size() >= 5 && !this.checkTheLastThreeTries(successfulMoves)) {
-                xNextMove = (int) (Math.random() * 9);
-                yNextMove = (int) (Math.random() * 9);
+            if (potentialMoves.size() == 0 || successfulMoves.size() >= 5 && !this.checkTheLastThreeMoves(successfulMoves) ||
+                    this.players[1].getMovesTally() > 60 && successfulMoves.size() >= 5 && !this.checkTheLastThreeMoves(successfulMoves)) {
+                double randomIndexMin = 0.5;
+                int randomIndexMax = fieldsStillAvailableForBombing.size();
+                int randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
+
+                xNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).charAt(0));
+                yNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).substring(1));
             } else {
                 double min = 0.5;
                 int max = potentialMoves.size() - 1;
                 int index = (int) ((Math.random() * max) + min);
-                xNextMove = this.transformInputToXValue(potentialMoves.get(index).charAt(0));
-                yNextMove = this.transformInputToYValue(potentialMoves.get(index).substring(1));
+                xNextMove = this.transformStringInputToXValue(potentialMoves.get(index).charAt(0));
+                yNextMove = this.transformStringInputToXValue(potentialMoves.get(index).substring(1));
             }
+            potentialMoves.clear();
         } else {
-            xNextMove = (int) (Math.random() * 9);
-            yNextMove = (int) (Math.random() * 9);
+            double randomIndexMin = 0.5;
+            int randomIndexMax = fieldsStillAvailableForBombing.size();
+            int randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
+
+            xNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).charAt(0));
+            yNextMove = this.transformStringInputToXValue(fieldsStillAvailableForBombing.get(randomIndex).substring(1));
         }
 
         successfulMoves.clear();
-        potentialMoves.clear();
 
         return new int[]{xNextMove, yNextMove};
     }
 
     private Field.CurrentState transformMovesToFieldRenderState(Playground playground, String lastMove) {
-        int xLastMove = this.transformInputToXValue(lastMove.charAt(0));
-        int yLastMove = this.transformInputToYValue(lastMove.substring(1));
+        int xLastMove = this.transformStringInputToXValue(lastMove.charAt(0));
+        int yLastMove = this.transformStringInputToXValue(lastMove.substring(1));
 
         return playground.getMap()[xLastMove][yLastMove].getFieldRenderState();
     }
@@ -391,47 +405,58 @@ public class Game {
     private ArrayList<String> choosePotentialMoves(ArrayList<String> successfulMoves) {
         ArrayList<String> potentialNextMoves = new ArrayList<>();
         for (String move : successfulMoves) {
-            int xLastMove = this.transformInputToXValue(move.charAt(0));
-            int yLastMove = this.transformInputToYValue(move.substring(1));
+            int xLastMove = this.transformStringInputToXValue(move.charAt(0));
+            int yLastMove = this.transformStringInputToXValue(move.substring(1));
 
             //guess right
             int xGuessRight = xLastMove + 1;
-            char charXGuessRight = this.reverseTransformInputToXValue(xGuessRight);
-            String StringYGuessRight = this.reverseTransformInputToYValue(yLastMove);
+            char charXGuessRight = this.transformNumericInputOfXToStringValue(xGuessRight);
+            String StringYGuessRight = this.transformNumericInputOfYToStringValue(yLastMove);
             potentialNextMoves.add(charXGuessRight + StringYGuessRight);
 
             //guess left
             int xGuessLeft = xLastMove - 1;
-            char charXGuessLeft = this.reverseTransformInputToXValue(xGuessLeft);
-            String StringYGuessLeft = this.reverseTransformInputToYValue(yLastMove);
+            char charXGuessLeft = this.transformNumericInputOfXToStringValue(xGuessLeft);
+            String StringYGuessLeft = this.transformNumericInputOfYToStringValue(yLastMove);
             potentialNextMoves.add(charXGuessLeft + StringYGuessLeft);
 
             //guess top
             int yGuessTop = yLastMove - 1;
-            char charXGuessTop = this.reverseTransformInputToXValue(xLastMove);
-            String StringYGuessTop = this.reverseTransformInputToYValue(yGuessTop);
+            char charXGuessTop = this.transformNumericInputOfXToStringValue(xLastMove);
+            String StringYGuessTop = this.transformNumericInputOfYToStringValue(yGuessTop);
             potentialNextMoves.add(charXGuessTop + StringYGuessTop);
 
             //guess bottom
             int yGuessBottom = yLastMove + 1;
-            char charXGuessBottom = this.reverseTransformInputToXValue(xLastMove);
-            String StringYGuessBottom = this.reverseTransformInputToYValue(yGuessBottom);
+            char charXGuessBottom = this.transformNumericInputOfXToStringValue(xLastMove);
+            String StringYGuessBottom = this.transformNumericInputOfYToStringValue(yGuessBottom);
             potentialNextMoves.add(charXGuessBottom + StringYGuessBottom);
         }
         return potentialNextMoves;
     }
 
-    private boolean checkTheLastThreeTries(ArrayList<String> successfulMoves) {
-        boolean lastThreeTriesSuccessful = false;
+    private boolean checkTheLastThreeMoves(ArrayList<String> successfulMoves) {
+        boolean lastThreeMovesSuccessful = false;
         for (int i = this.movesPlayer2.size() - 1; i > this.movesPlayer2.size() - 4; i--) {
             if (successfulMoves.contains(this.movesPlayer2.get(i))) {
-                lastThreeTriesSuccessful = true;
+                lastThreeMovesSuccessful = true;
                 break;
             }
         }
-        return lastThreeTriesSuccessful;
+        return lastThreeMovesSuccessful;
     }
 
+    private ArrayList<String> getAllFields() {
+        ArrayList<String> allFields = new ArrayList<>();
+        for (int x = 0; x <= 9; x++) {
+            for (int y = 0; y <= 9; y++) {
+                char reverseX = this.transformNumericInputOfXToStringValue(x);
+                String reverseY = this.transformNumericInputOfYToStringValue(y);
+                allFields.add(reverseX + reverseY);
+            }
+        }
+        return allFields;
+    }
     /**
      * AI logic end
      */
@@ -449,8 +474,8 @@ public class Game {
             }
             if (checkInput(input)) {
                 String toUpperCase = input.toUpperCase();
-                int validX = this.transformInputToXValue(toUpperCase.charAt(0));
-                int validY = this.transformInputToYValue(toUpperCase.substring(1));
+                int validX = this.transformStringInputToXValue(toUpperCase.charAt(0));
+                int validY = this.transformStringInputToXValue(toUpperCase.substring(1));
                 System.out.println("Please enter the direction you want your ship to position in: 'r' for right; 'd' for down");
                 String direction = sc.nextLine();
                 if (direction.equalsIgnoreCase("r")) {
@@ -511,9 +536,9 @@ public class Game {
             //random number decides whether the ship will be positioned to the right or downwards
             double right1Down0 = Math.random();
 
-            int x = (int) (Math.random() * 9);
+            int x = (int) (Math.random() * 10);
             xValues.add(x);
-            int y = (int) (Math.random() * 9);
+            int y = (int) (Math.random() * 10);
             yValues.add(y);
 
             if (right1Down0 >= 0.5) {
@@ -673,7 +698,7 @@ public class Game {
         return matcher.matches();
     }
 
-    private int transformInputToXValue(char xAsChar) {
+    private int transformStringInputToXValue(char xAsChar) {
         int x = (int) xAsChar - 65;
         if (x >= 0 && x <= 9) {
             return x;
@@ -681,7 +706,7 @@ public class Game {
         return -1;
     }
 
-    private int transformInputToYValue(String yAsString) {
+    private int transformStringInputToXValue(String yAsString) {
         int y = Integer.parseInt(yAsString) - 1;
         if (y >= 0 && y <= 9) {
             return y;
@@ -689,11 +714,11 @@ public class Game {
         return -1;
     }
 
-    private char reverseTransformInputToXValue(int x) {
+    private char transformNumericInputOfXToStringValue(int x) {
         return (char) (x + 65);
     }
 
-    private String reverseTransformInputToYValue(int y) {
+    private String transformNumericInputOfYToStringValue(int y) {
         return String.valueOf(y + 1);
     }
 

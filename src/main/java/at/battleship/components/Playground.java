@@ -148,7 +148,7 @@ public class Playground {
         this.player = player;
     }
 
-    public boolean isShipDestroyed() {
+    boolean isShipDestroyed() {
         return shipDestroyed;
     }
 }
