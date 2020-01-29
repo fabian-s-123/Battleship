@@ -79,20 +79,22 @@ public class Bot extends Player {
             }
 
             if (potentialMoves.size() == 0 || this.successfulMoves.size() >= 5 && !this.checkLastFourMoves(this.successfulMoves)) {
+                //all available fields are checked for the amount of viable field neighbours and only the ones with the most will be picked for the random draw
+                ArrayList<String> fieldsAvailableForBotSorted = (ArrayList<String>) this.fieldsAvailableForBot.stream()
+                        .sorted(Comparator.comparingInt(this::checkViableFieldNeighbours))
+                        .collect(Collectors.toList());
 
-                //if first try does not have any viable neighbours left -> re-rolls the random number
+                int viableNeighboursAtTop = this.checkViableFieldNeighbours(fieldsAvailableForBotSorted.get(fieldsAvailableForBotSorted.size() - 1));
+
+                fieldsAvailableForBotSorted = (ArrayList<String>) fieldsAvailableForBot.stream()
+                        .filter(e -> this.checkViableFieldNeighbours(e) == viableNeighboursAtTop)
+                        .collect(Collectors.toList());
+
                 double randomIndexMin = 0.5;
-                int randomIndexMax = this.fieldsAvailableForBot.size();
+                int randomIndexMax = fieldsAvailableForBotSorted.size();
                 int randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
-
-                if (this.neighboursStillViableForBombing(this.fieldsAvailableForBot.get(randomIndex), this.fieldsAvailableForBot) > 0) {
-                    xNextMove = this.game.transformStringInputToXValue(this.fieldsAvailableForBot.get(randomIndex).charAt(0));
-                    yNextMove = this.game.transformStringInputToYValue(this.fieldsAvailableForBot.get(randomIndex).substring(1));
-                } else {
-                    randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
-                    xNextMove = this.game.transformStringInputToXValue(this.fieldsAvailableForBot.get(randomIndex).charAt(0));
-                    yNextMove = this.game.transformStringInputToYValue(this.fieldsAvailableForBot.get(randomIndex).substring(1));
-                }
+                xNextMove = this.game.transformStringInputToXValue(fieldsAvailableForBot.get(randomIndex).charAt(0));
+                yNextMove = this.game.transformStringInputToYValue(fieldsAvailableForBot.get(randomIndex).substring(1));
 
             } else {
                 double min = 0.5;
@@ -101,14 +103,25 @@ public class Bot extends Player {
                 xNextMove = this.game.transformStringInputToXValue(potentialMoves.get(index).charAt(0));
                 yNextMove = this.game.transformStringInputToYValue(potentialMoves.get(index).substring(1));
             }
-            potentialMoves.clear();
-        } else { //if a ship has been destroyed with the last move -> go for random number
+
+        } else { //if a ship has been destroyed with the last move or no logical potential next moves are available -> go for random number
+            //all available fields are checked for the amount of viable field neighbours and only the ones with the most will be picked for the random draw
+            ArrayList<String> fieldsAvailableForBotSorted = (ArrayList<String>) this.fieldsAvailableForBot.stream()
+                    .sorted(Comparator.comparingInt(this::checkViableFieldNeighbours))
+                    .collect(Collectors.toList());
+
+            int viableNeighboursAtTop = this.checkViableFieldNeighbours(fieldsAvailableForBotSorted.get(fieldsAvailableForBotSorted.size() - 1));
+
+            fieldsAvailableForBotSorted = (ArrayList<String>) fieldsAvailableForBot.stream()
+                    .filter(e -> this.checkViableFieldNeighbours(e) == viableNeighboursAtTop)
+                    .collect(Collectors.toList());
+
             double randomIndexMin = 0.5;
-            int randomIndexMax = this.fieldsAvailableForBot.size();
+            int randomIndexMax = fieldsAvailableForBotSorted.size();
             int randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
 
-            xNextMove = this.game.transformStringInputToXValue(this.fieldsAvailableForBot.get(randomIndex).charAt(0));
-            yNextMove = this.game.transformStringInputToYValue(this.fieldsAvailableForBot.get(randomIndex).substring(1));
+            xNextMove = this.game.transformStringInputToXValue(fieldsAvailableForBot.get(randomIndex).charAt(0));
+            yNextMove = this.game.transformStringInputToYValue(fieldsAvailableForBot.get(randomIndex).substring(1));
         }
 
         return new int[]{xNextMove, yNextMove};
@@ -138,41 +151,41 @@ public class Bot extends Player {
 
     private ArrayList<String> getFieldNeighbours(String field) {
         ArrayList<String> fieldNeighbours = new ArrayList<>();
-        int xField = game.transformStringInputToXValue(field.charAt(0));
-        int yField = game.transformStringInputToYValue(field.substring(1));
+        int xField = this.game.transformStringInputToXValue(field.charAt(0));
+        int yField = this.game.transformStringInputToYValue(field.substring(1));
 
         //neighbour right
         int xNeighbourRight = xField + 1;
-        char xNeighbourRightAsChar = game.transformNumericInputOfXToStringValue(xNeighbourRight);
-        String yNeighbourRightAsString = game.transformNumericInputOfYToStringValue(yField);
+        char xNeighbourRightAsChar = this.game.transformNumericInputOfXToStringValue(xNeighbourRight);
+        String yNeighbourRightAsString = this.game.transformNumericInputOfYToStringValue(yField);
         fieldNeighbours.add(xNeighbourRightAsChar + yNeighbourRightAsString);
 
         //neighbour left
         int xNeighbourLeft = xField - 1;
-        char xNeighbourLeftAsChar = game.transformNumericInputOfXToStringValue(xNeighbourLeft);
-        String yNeighbourLeftAsString = game.transformNumericInputOfYToStringValue(yField);
+        char xNeighbourLeftAsChar = this.game.transformNumericInputOfXToStringValue(xNeighbourLeft);
+        String yNeighbourLeftAsString = this.game.transformNumericInputOfYToStringValue(yField);
         fieldNeighbours.add(xNeighbourLeftAsChar + yNeighbourLeftAsString);
 
         //neighbour top
         int yNeighbourTop = yField - 1;
-        char xNeighbourTopAsChar = game.transformNumericInputOfXToStringValue(xField);
-        String yNeighbourTopAsString = game.transformNumericInputOfYToStringValue(yNeighbourTop);
+        char xNeighbourTopAsChar = this.game.transformNumericInputOfXToStringValue(xField);
+        String yNeighbourTopAsString = this.game.transformNumericInputOfYToStringValue(yNeighbourTop);
         fieldNeighbours.add(xNeighbourTopAsChar + yNeighbourTopAsString);
 
         //neighbour bottom
         int yNeighbourBottom = yField + 1;
-        char xNeighbourBottomAsChar = game.transformNumericInputOfXToStringValue(xField);
-        String yNeighbourBottomAsString = game.transformNumericInputOfYToStringValue(yNeighbourBottom);
+        char xNeighbourBottomAsChar = this.game.transformNumericInputOfXToStringValue(xField);
+        String yNeighbourBottomAsString = this.game.transformNumericInputOfYToStringValue(yNeighbourBottom);
         fieldNeighbours.add(xNeighbourBottomAsChar + yNeighbourBottomAsString);
 
         return fieldNeighbours;
     }
 
-    private int neighboursStillViableForBombing(String field, ArrayList<String> fieldsAvailableForBombing) {
+    private int checkViableFieldNeighbours(String field) {
         int neighboursAvailable = 0;
         ArrayList<String> neighbours = this.getFieldNeighbours(field);
         for (String neighbour : neighbours) {
-            if (fieldsAvailableForBombing.contains(neighbour)) {
+            if (this.fieldsAvailableForBot.contains(neighbour)) {
                 neighboursAvailable++;
             }
         }
@@ -195,8 +208,8 @@ public class Bot extends Player {
         ArrayList<String> allFields = new ArrayList<>();
         for (int x = 0; x <= 9; x++) {
             for (int y = 0; y <= 9; y++) {
-                char reverseX = game.transformNumericInputOfXToStringValue(x);
-                String reverseY = game.transformNumericInputOfYToStringValue(y);
+                char reverseX = this.game.transformNumericInputOfXToStringValue(x);
+                String reverseY = this.game.transformNumericInputOfYToStringValue(y);
                 allFields.add(reverseX + reverseY);
             }
         }
@@ -205,27 +218,8 @@ public class Bot extends Player {
 
 
 
-
-
-
-
-    /**
-     * Getters & Setters
-     */
-    public Game getGame() {
-        return game;
-    }
-
-    public ArrayList<String> getFieldsAvailableForBot() {
-        return fieldsAvailableForBot;
-    }
-
     public void removeFieldAvailableForBot(String lastMove) {
         this.fieldsAvailableForBot.remove(lastMove);
-    }
-
-    public ArrayList<String> getSuccessfulMoves() {
-        return successfulMoves;
     }
 
     public void addSuccessfulMoves(String successfulMove) {
