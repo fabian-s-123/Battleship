@@ -1,5 +1,7 @@
 package at.battleship.components;
 
+import at.battleship.players.Player;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -10,7 +12,7 @@ public class Playground {
     private Player player;
     private boolean shipDestroyed = false;
 
-    Playground(ArrayList<Ship> ships, Player player) {
+    public Playground(ArrayList<Ship> ships, Player player) {
         this.map = createNewArray();
         this.ships = ships;
         this.player = player;
@@ -31,11 +33,11 @@ public class Playground {
         return array;
     }
 
-    void setShips(ArrayList<Ship> ships) {
+    public void setShips(ArrayList<Ship> ships) {
         this.ships = ships;
     }
 
-    void addShip(Ship ship) {
+    public void addShip(Ship ship) {
         this.ships.add(ship);
     }
 
@@ -57,7 +59,7 @@ public class Playground {
 
 
 
-    void checkShipHitPoints(int x, int y, Player opponent) throws InterruptedException {
+    public void checkShipHitPoints(int x, int y, Player opponent) throws InterruptedException {
         boolean shipDestroyed = false;
         for (Ship ship : this.ships) {
             if (ship.getValueBetweenX(ship).length != 0) {
@@ -103,7 +105,7 @@ public class Playground {
         }
     }
 
-    int checkMaxShipHitPointsCombined() {
+    public int checkMaxShipHitPointsCombined() {
         int currentHitPointsCombined = 0;
         for (Ship ship : this.ships) {
             currentHitPointsCombined += ship.getLength(ship.getType());
@@ -111,7 +113,7 @@ public class Playground {
         return currentHitPointsCombined;
     }
 
-    int checkPosition(int posX, int posY) {
+    public int checkPosition(int posX, int posY) {
         Field currentField = this.getMap()[posX][posY];
         Field.CurrentState currentState = currentField.getFieldRenderState();
         int result = -3;
@@ -149,7 +151,7 @@ public class Playground {
         this.player = player;
     }
 
-    boolean isShipDestroyed() {
+    public boolean isShipDestroyed() {
         return shipDestroyed;
     }
 }

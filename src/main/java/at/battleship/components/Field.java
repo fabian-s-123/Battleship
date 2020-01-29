@@ -57,7 +57,7 @@ public class Field {
     }
 
 
-    void setShip(Ship.Type ship) {
+    public void setShip(Ship.Type ship) {
         switch (ship) {
             case CARRIER:
                 this.setCurrentState(CurrentState.CARRIER);
@@ -74,7 +74,7 @@ public class Field {
         }
     }
 
-    CurrentState getFieldRenderState() {
+    public CurrentState getFieldRenderState() {
         return fieldRenderState;
     }
 

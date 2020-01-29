@@ -1,6 +1,6 @@
 package at.battleship;
 
-import at.battleship.components.Game;
+import at.battleship.game.Game;
 
 public class Main {
     public static void main(String[] args) throws InterruptedException {

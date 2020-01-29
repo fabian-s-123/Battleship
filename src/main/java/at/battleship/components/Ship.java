@@ -9,7 +9,7 @@ public class Ship {
     private int endRangeY;
     private int hitPoints;
 
-    Ship(Type type, int startRangeX, int endRangeX, int startRangeY, int endRangeY) {
+    public Ship(Type type, int startRangeX, int endRangeX, int startRangeY, int endRangeY) {
         this.type = type;
         this.startRangeX = startRangeX;
         this.endRangeX = endRangeX;
@@ -18,7 +18,7 @@ public class Ship {
         this.hitPoints = type.length;
     }
 
-    Ship(Type type) {
+    public Ship(Type type) {
         this.type = type;
         this.hitPoints = type.length;
     }
@@ -36,11 +36,11 @@ public class Ship {
         }
     }
 
-    int getLength(Type type) {
+    public int getLength(Type type) {
         return type.length;
     }
 
-    int[] getValueBetweenX(Ship ship) {
+    public int[] getValueBetweenX(Ship ship) {
         if ((ship.getEndRangeX() - ship.getStartRangeX()) == 0) {
             return new int[0];
         } else {
@@ -52,7 +52,7 @@ public class Ship {
         }
     }
 
-    int[] getValueBetweenY(Ship ship) {
+    public int[] getValueBetweenY(Ship ship) {
         if ((ship.getEndRangeY() - ship.getStartRangeY()) == 0) {
             return new int[0];
         } else {
@@ -72,15 +72,15 @@ public class Ship {
         hitPoints--;
     }
 
-    Type getType() {
+    public Type getType() {
         return this.type;
     }
 
-    int getStartRangeX() {
+    public int getStartRangeX() {
         return startRangeX;
     }
 
-    void setStartRangeX(int startRangeX) {
+    public void setStartRangeX(int startRangeX) {
         this.startRangeX = startRangeX;
     }
 
@@ -88,15 +88,15 @@ public class Ship {
         return endRangeX;
     }
 
-    void setEndRangeX(int endRangeX) {
+    public void setEndRangeX(int endRangeX) {
         this.endRangeX = endRangeX;
     }
 
-    int getStartRangeY() {
+    public int getStartRangeY() {
         return startRangeY;
     }
 
-    void setStartRangeY(int startRangeY) {
+    public void setStartRangeY(int startRangeY) {
         this.startRangeY = startRangeY;
     }
 
@@ -104,7 +104,7 @@ public class Ship {
         return endRangeY;
     }
 
-    void setEndRangeY(int endRangeY) {
+    public void setEndRangeY(int endRangeY) {
         this.endRangeY = endRangeY;
     }
 

@@ -1,12 +1,12 @@
-package at.battleship.components;
+package at.battleship.players;
 
-public class Player {
+public abstract class Player {
 
     private String name;
     private boolean playerTurn;
     private boolean isVisible;
     private int currentScore;
-    private int movesTally = 0;
+    int movesTally = 0;
 
     Player(String name, boolean playerTurn, boolean isVisible, int currentScore) {
         this.name = name;
@@ -19,11 +19,11 @@ public class Player {
         return name;
     }
 
-    boolean getPlayerTurn() {
+    public boolean getPlayerTurn() {
         return playerTurn;
     }
 
-    void setPlayerTurn(boolean playerTurn) {
+    public void setPlayerTurn(boolean playerTurn) {
         this.playerTurn = playerTurn;
     }
 
@@ -35,15 +35,15 @@ public class Player {
         return currentScore;
     }
 
-    void setCurrentScore(int currentScore) {
+    public void setCurrentScore(int currentScore) {
         this.currentScore = currentScore;
     }
 
-    int getMovesTally() {
+    public int getMovesTally() {
         return movesTally;
     }
 
-    void addMovesTally() {
+    public void addMovesTally() {
         this.movesTally++;
     }
 }

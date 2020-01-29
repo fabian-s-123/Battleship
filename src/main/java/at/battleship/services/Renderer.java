@@ -1,7 +1,7 @@
 package at.battleship.services;
 
-import at.battleship.components.Player;
 import at.battleship.components.Playground;
+import at.battleship.players.Player;
 
 import java.io.IOException;
 
@@ -12,7 +12,7 @@ public class Renderer {
     private Player player1;
     private Player player2;
 
-    public Renderer(Playground playgroundPlayer1, Playground playgroundPlayer2, Player player1, Player player2) throws InterruptedException {
+    public Renderer(Playground playgroundPlayer1, Playground playgroundPlayer2, Player player1, Player player2) {
         this.playgroundPlayer1 = playgroundPlayer1;
         this.playgroundPlayer2 = playgroundPlayer2;
         this.player1 = player1;
