@@ -63,7 +63,7 @@ public class Bot extends Player {
                 char finalPotentialX = potentialX;
                 potentialMoves = (ArrayList<String>) potentialMoves.stream()
                         .filter(e -> e.charAt(0) == finalPotentialX)
-                        .filter(e -> (int) e.charAt(0) != ((int) e.charAt(0) - 1) && (int) e.charAt(0) != ((int) e.charAt(0) + 1))
+                        .filter(e -> (int) e.charAt(0) != ((int) e.charAt(0) - 1) || (int) e.charAt(0) != ((int) e.charAt(0) + 1))
                         .filter(e -> (Integer.parseInt(e.substring(1)) - Integer.parseInt(lastSuccessfulMove.substring(1))) < 5 &&
                                 (Integer.parseInt(e.substring(1)) - Integer.parseInt(lastSuccessfulMove.substring(1))) > -5)
                         .collect(Collectors.toList());
@@ -72,7 +72,7 @@ public class Bot extends Player {
                 String finalPotentialY = potentialY;
                 potentialMoves = (ArrayList<String>) potentialMoves.stream()
                         .filter(e -> e.substring(1).equals(finalPotentialY))
-                        .filter(e -> Integer.parseInt(e.substring(1)) != (Integer.parseInt(e.substring(1)) - 1) && Integer.parseInt(e.substring(1)) != (Integer.parseInt(e.substring(1)) + 1))
+                        .filter(e -> Integer.parseInt(e.substring(1)) != (Integer.parseInt(e.substring(1)) - 1) || Integer.parseInt(e.substring(1)) != (Integer.parseInt(e.substring(1)) + 1))
                         .filter(e -> ((int) e.charAt(0) - (int) lastSuccessfulMove.charAt(0)) < 5 &&
                                 ((int) e.charAt(0) - (int) lastSuccessfulMove.charAt(0)) > -5)
                         .collect(Collectors.toList());
