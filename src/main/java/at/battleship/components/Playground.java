@@ -4,6 +4,7 @@ import at.battleship.players.Player;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Optional;
 
 public class Playground {
 
@@ -41,26 +42,33 @@ public class Playground {
         this.ships.add(ship);
     }
 
-//    int[] getDamagedShips() {
-//        int[] damagedFields = new int[]{};
-//        Ship damagedShip = this.ships.stream().
-//                filter(e -> e.getHitPoints() != e.getLength(e.getType()))
+//    public int[] getDamagedShip() {
+//        int[] damagedShipFields = new int[0];
+//        Ship damagedShip = this.ships.stream()
+//                .filter(e -> e.getHitPoints() != e.getLength(e.getType()) && e.getHitPoints() > 0)
 //                .findFirst()
 //                .get();
-//        if (damagedShip.getLength(damagedShip.getType()) - damagedShip.getHitPoints() >= 2) {
-//            if (damagedShip.getValueBetweenX(damagedShip).length == 0) {
-//                damagedFields = damagedShip.getValueBetweenY(damagedShip);
-//            } else {
-//                damagedFields = damagedShip.getValueBetweenX(damagedShip);
+//            int[] rangeX = damagedShip.getValueBetweenX(damagedShip);
+//            int[] rangeY = damagedShip.getValueBetweenY(damagedShip);
+//            if (!(rangeX.length == 0)) {
+//                damagedShipFields = new int[rangeX.length + 2];
+//                for (int i = 2; i <= damagedShipFields.length - 1; i++) {
+//                    damagedShipFields[0] = 0;
+//                    damagedShipFields[1] = damagedShip.getStartRangeY();
+//                    damagedShipFields[i] = rangeX[i - 1];
+//                }
+//            } else if (!(rangeY.length == 0)) {
+//                damagedShipFields = new int[rangeY.length + 2];
+//                for (int i = 2; i <= damagedShipFields.length - 1; i++) {
+//                    damagedShipFields[0] = 1;
+//                    damagedShipFields[1] = damagedShip.getStartRangeX();
+//                    damagedShipFields[i] = rangeY[i - 1];
+//                }
 //            }
-//        } else
-//        return damagedFields;
+//        return damagedShipFields;
 //    }
 
-
-
     public void checkShipHitPoints(int x, int y, Player opponent) throws InterruptedException {
-        boolean shipDestroyed = false;
         for (Ship ship : this.ships) {
             if (ship.getValueBetweenX(ship).length != 0) {
                 if (Arrays.stream(ship.getValueBetweenX(ship)).anyMatch(e -> e == x) && ship.getStartRangeY() == y) {
