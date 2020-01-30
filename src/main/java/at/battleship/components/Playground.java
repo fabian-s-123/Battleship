@@ -18,7 +18,7 @@ public class Playground {
         this.player = player;
     }
 
-    Playground(Player player) {
+    public Playground(Player player) {
         this.map = createNewArray();
         this.player = player;
     }

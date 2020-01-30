@@ -9,6 +9,8 @@ import at.battleship.players.Player;
 import at.battleship.services.Renderer;
 
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -56,14 +58,14 @@ public class Game {
         /**
          * set battlefield for player1 & bot
          */
-        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1();
-        ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2();
-        this.playgroundPlayer1 = new Playground(shipsPlayer1, this.humanPlayer);
-        this.playgroundPlayer2 = new Playground(shipsPlayer2, this.bot);
-        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
-
-        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
-        this.addShipsToThePlayground(shipsPlayer2, this.playgroundPlayer2);
+//        ArrayList<Ship> shipsPlayer1 = this.setShipsPlayer1();
+//        ArrayList<Ship> shipsPlayer2 = this.setShipsPlayer2();
+//        this.playgroundPlayer1 = new Playground(shipsPlayer1, this.humanPlayer);
+//        this.playgroundPlayer2 = new Playground(shipsPlayer2, this.bot);
+//        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
+//
+//        this.addShipsToThePlayground(shipsPlayer1, this.playgroundPlayer1);
+//        this.addShipsToThePlayground(shipsPlayer2, this.playgroundPlayer2);
 
 
         /**
@@ -85,19 +87,19 @@ public class Game {
         /**
          * manual setting for player1 & randomly generated for bot
          */
-//        this.playgroundPlayer1 = new Playground(this.humanPlayer);
-//        this.playgroundPlayer2 = new Playground(this.bot);
-//        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
-//
-//        //executes the setting of the ships for the bot in a separate thread
-//        ExecutorService executorService = Executors.newFixedThreadPool(2);
-//        executorService.execute(this::setShipsForBot);
-//        executorService.shutdown();
-//
-//        this.setShips(player1);
+        this.playgroundPlayer1 = new Playground(this.humanPlayer);
+        this.playgroundPlayer2 = new Playground(this.bot);
+        this.renderer = new Renderer(this.playgroundPlayer1, this.playgroundPlayer2, player1, player2);
+
+        //executes the setting of the ships for the bot in a separate thread
+        ExecutorService executorService = Executors.newFixedThreadPool(2);
+        executorService.execute(this::setShipsForBot);
+        executorService.shutdown();
+
+        this.setShipsForHumanPlayer(player1);
     }
 
-    private void setShipsForHumanPlayer(HumanPlayer humanPlayer) throws InterruptedException {
+    private void setShipsForHumanPlayer(Player humanPlayer) throws InterruptedException {
         Scanner sc = new Scanner(System.in);
         System.out.println("First, set Your Ships: you have 1 Carrier (5x1), 2 Battleships (4x1), 3 Destroyer (3x1) & 4 Submarines (2x1).");
         System.out.println("Set the starting point of your Ships.");
@@ -168,12 +170,6 @@ public class Game {
         Scanner sc = new Scanner(System.in);
         boolean isPlaying = true;
         boolean shipDestroyedWithPreviousMove = false;
-
-        /**
-         * delete after finishing bot AI
-         */
-        int count = 0;
-
 
         System.out.println("Press enter to start the game.");
         String enter = sc.nextLine();
@@ -251,22 +247,9 @@ public class Game {
                     guessX = guesses[0];
                     guessY = guesses[1];
 
-                    /**
-                     * delete after finishing bot AI
-                     */
-                    if (count == 0) {
-                        guessX = 8;
-                        guessY = 7;
-                    }
-
                     char reverseX = this.transformNumericInputOfXToStringValue(guessX);
                     String reverseY = this.transformNumericInputOfYToStringValue(guessY);
                     botInput = reverseX + reverseY;
-
-                    /**
-                     * delete after finishing bot AI
-                     */
-                    count++;
 
                     //checks if the move has already been made
                     moveAlreadyMade = this.checkIfMoveAlreadyMade(botInput, this.bot);
@@ -285,7 +268,7 @@ public class Game {
                     shipDestroyedWithPreviousMove = this.playgroundPlayer1.isShipDestroyed();
                 }
                 this.renderer.render();
-                this.bot.setPlayerTurn(true); //TODO delete if Bot check is finished
+                //this.bot.setPlayerTurn(true); //TODO delete if Bot check is finished
                 if (this.bot.getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
                     System.out.println("Congratulations " + this.bot.getName() + ", you won!");
                     System.out.println("It took you " + this.bot.getMovesTally() + " rounds to defeat your opponent.");

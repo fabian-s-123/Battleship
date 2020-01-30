@@ -20,19 +20,18 @@ public class Bot extends Player {
     }
 
 
-
     /**
      * Main Method
      */
     public int[] playRoundBot(boolean shipDestroyed) {
-        int xNextMove;
-        int yNextMove;
+        int xNextMove = -1;
+        int yNextMove = -1;
+
+        ArrayList<String> potentialMoves; //all potential moves are stored here
+        potentialMoves = this.choosePotentialMoves(this.successfulMoves); //fills the list with every field around a already successfully targeted field ( = Field.CurrentState.HIT)
 
         //if no ship has been destroyed with previous hit, go for standard logic of trying to find a line of previous hits and move along that coordinate
         if (!shipDestroyed) {
-
-            ArrayList<String> potentialMoves; //all potential moves are stored here
-            potentialMoves = this.choosePotentialMoves(this.successfulMoves); //fills the list with every field around a already successfully targeted field ( = Field.CurrentState.HIT)
 
             //checks if the two last successful moves were on the same X or Y coordinate -> if so: move along the same coordinate for the next guess
             char potentialX = 'z';
@@ -45,8 +44,8 @@ public class Bot extends Player {
                         (Integer.parseInt(this.successfulMoves.get(indexTop).substring(1)) - Integer.parseInt(this.successfulMoves.get(indexBelowTop).substring(1))) > -2) {
                     potentialX = this.successfulMoves.get(indexTop).charAt(0);
                 } else if (this.successfulMoves.get(indexTop).substring(1).equals(this.successfulMoves.get(indexBelowTop).substring(1)) &&
-                        ((int)this.successfulMoves.get(indexTop).charAt(0) - (int)this.successfulMoves.get(indexBelowTop).charAt(0)) < 2 &&
-                        ((int)this.successfulMoves.get(indexTop).charAt(0) - (int)this.successfulMoves.get(indexBelowTop).charAt(0)) > -2) {
+                        ((int) this.successfulMoves.get(indexTop).charAt(0) - (int) this.successfulMoves.get(indexBelowTop).charAt(0)) < 2 &&
+                        ((int) this.successfulMoves.get(indexTop).charAt(0) - (int) this.successfulMoves.get(indexBelowTop).charAt(0)) > -2) {
                     potentialY = this.successfulMoves.get(indexTop).substring(1);
                 } else { //else just use a field neighbour of the last successful guess for the next move
                     ArrayList<String> lastSuccessfulMove = new ArrayList<>();
@@ -55,7 +54,7 @@ public class Bot extends Player {
                 }
             }
 
-            //leaves only potential moves in the list which align with previous hits on the same coordinate
+            //leaves only potential moves in the list which align with previous hits on the same coordinate within a range of +4 to -4
             if (potentialX != 'z') {
                 String lastSuccessfulMove = this.successfulMoves.get(this.successfulMoves.size() - 1);
                 char finalPotentialX = potentialX;
@@ -78,60 +77,72 @@ public class Bot extends Player {
                         .collect(Collectors.toList());
             }
 
-            if (potentialMoves.size() == 0 || this.successfulMoves.size() >= 5 && !this.checkLastFourMoves(this.successfulMoves)) {
-                //all available fields are checked for the amount of viable field neighbours and only the ones with the most will be picked for the random draw
-                ArrayList<String> fieldsAvailableForBotSorted = (ArrayList<String>) this.fieldsAvailableForBot.stream()
-                        .sorted(Comparator.comparingInt(this::checkViableFieldNeighbours))
-                        .collect(Collectors.toList());
 
-                int viableNeighboursAtTop = this.checkViableFieldNeighbours(fieldsAvailableForBotSorted.get(fieldsAvailableForBotSorted.size() - 1));
+            //if no logical move is available or the last four moves were unsuccessful and the bot has already moved at least 40 times -> go for the fields with the most potential field neighbours
+            if (this.movesTally < 40) {
+                if (potentialMoves.size() == 0 || this.successfulMoves.size() >= 5 && !this.checkLastFourMoves(this.successfulMoves)) {
+                    xNextMove = this.getRandomNumber(this.fieldsAvailableForBot)[0];
+                    yNextMove = this.getRandomNumber(this.fieldsAvailableForBot)[1];
+                } else {
+                    xNextMove = this.getRandomNumber(potentialMoves)[0];
+                    yNextMove = this.getRandomNumber(potentialMoves)[1];
+                }
 
-                fieldsAvailableForBotSorted = (ArrayList<String>) fieldsAvailableForBot.stream()
-                        .filter(e -> this.checkViableFieldNeighbours(e) == viableNeighboursAtTop)
-                        .collect(Collectors.toList());
-
-                double randomIndexMin = 0.5;
-                int randomIndexMax = fieldsAvailableForBotSorted.size();
-                int randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
-                xNextMove = this.game.transformStringInputToXValue(fieldsAvailableForBot.get(randomIndex).charAt(0));
-                yNextMove = this.game.transformStringInputToYValue(fieldsAvailableForBot.get(randomIndex).substring(1));
-
-            } else {
-                double min = 0.5;
-                int max = potentialMoves.size() - 1;
-                int index = (int) ((Math.random() * max) + min);
-                xNextMove = this.game.transformStringInputToXValue(potentialMoves.get(index).charAt(0));
-                yNextMove = this.game.transformStringInputToYValue(potentialMoves.get(index).substring(1));
+                //if no logical move is available or the last four moves were unsuccessful and the bot has not yet moved 40 times -> go for random move
+            }
+            if (this.movesTally >= 40) {
+                if (potentialMoves.size() == 0 || this.successfulMoves.size() >= 5 && !this.checkLastFourMoves(this.successfulMoves)) {
+                    xNextMove = this.getRandomNumberOfFieldsWithTheMostPotentialNeighbours()[0];
+                    yNextMove = this.getRandomNumberOfFieldsWithTheMostPotentialNeighbours()[1];
+                } else {
+                    xNextMove = this.getRandomNumber(potentialMoves)[0];
+                    yNextMove = this.getRandomNumber(potentialMoves)[1];
+                }
             }
 
-        } else { //if a ship has been destroyed with the last move or no logical potential next moves are available -> go for random number
-            //all available fields are checked for the amount of viable field neighbours and only the ones with the most will be picked for the random draw
-            ArrayList<String> fieldsAvailableForBotSorted = (ArrayList<String>) this.fieldsAvailableForBot.stream()
-                    .sorted(Comparator.comparingInt(this::checkViableFieldNeighbours))
-                    .collect(Collectors.toList());
-
-            int viableNeighboursAtTop = this.checkViableFieldNeighbours(fieldsAvailableForBotSorted.get(fieldsAvailableForBotSorted.size() - 1));
-
-            fieldsAvailableForBotSorted = (ArrayList<String>) fieldsAvailableForBot.stream()
-                    .filter(e -> this.checkViableFieldNeighbours(e) == viableNeighboursAtTop)
-                    .collect(Collectors.toList());
-
-            double randomIndexMin = 0.5;
-            int randomIndexMax = fieldsAvailableForBotSorted.size();
-            int randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
-
-            xNextMove = this.game.transformStringInputToXValue(fieldsAvailableForBot.get(randomIndex).charAt(0));
-            yNextMove = this.game.transformStringInputToYValue(fieldsAvailableForBot.get(randomIndex).substring(1));
+        //if a ship has been destroyed with the previous move: either go for complete random move (if movesTally < 40) or go for random move of the fields with the most potential field neighbours
+        } else if (this.movesTally < 40) {
+            xNextMove = this.getRandomNumber(this.fieldsAvailableForBot)[0];
+            yNextMove = this.getRandomNumber(this.fieldsAvailableForBot)[1];
+        } else {
+            xNextMove = this.getRandomNumberOfFieldsWithTheMostPotentialNeighbours()[0];
+            yNextMove = this.getRandomNumberOfFieldsWithTheMostPotentialNeighbours()[1];
         }
 
         return new int[]{xNextMove, yNextMove};
     }
 
 
-
     /**
      * Helper Methods
      */
+    private int[] getRandomNumber(ArrayList<String> fields) {
+        double randomIndexMin = 0.5;
+        int randomIndexMax = fields.size();
+        int randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
+
+        return new int[]{this.game.transformStringInputToXValue(fields.get(randomIndex).charAt(0)), this.game.transformStringInputToYValue(fields.get(randomIndex).substring(1))};
+    }
+
+    private int[] getRandomNumberOfFieldsWithTheMostPotentialNeighbours() {
+        //all available fields are checked for the amount of viable field neighbours and only the ones with the most will be picked for the random draw
+        ArrayList<String> fieldsAvailableForBotSorted = (ArrayList<String>) this.fieldsAvailableForBot.stream()
+                .sorted(Comparator.comparingInt(this::checkViableFieldNeighbours))
+                .collect(Collectors.toList());
+
+        int viableNeighboursAtTop = this.checkViableFieldNeighbours(fieldsAvailableForBotSorted.get(fieldsAvailableForBotSorted.size() - 1));
+
+        fieldsAvailableForBotSorted = (ArrayList<String>) fieldsAvailableForBotSorted.stream()
+                .filter(e -> this.checkViableFieldNeighbours(e) == viableNeighboursAtTop)
+                .collect(Collectors.toList());
+
+        double randomIndexMin = 0.5;
+        int randomIndexMax = fieldsAvailableForBotSorted.size();
+        int randomIndex = (int) ((Math.random() * (randomIndexMax - randomIndexMin)) + randomIndexMin);
+
+        return new int[]{this.game.transformStringInputToXValue(fieldsAvailableForBotSorted.get(randomIndex).charAt(0)), this.game.transformStringInputToYValue(fieldsAvailableForBotSorted.get(randomIndex).substring(1))};
+    }
+
     private ArrayList<String> choosePotentialMoves(ArrayList<String> successfulMoves) {
         ArrayList<String> potentialNextMoves = new ArrayList<>();
         for (String move : successfulMoves) {
@@ -215,7 +226,6 @@ public class Bot extends Player {
         }
         return allFields;
     }
-
 
 
     public void removeFieldAvailableForBot(String lastMove) {
