@@ -38,7 +38,7 @@ public class HumanVsBot extends Game {
 
     private void playIntro() {
         Scanner sc = new Scanner(System.in);
-        System.out.println("Welcome to Battleships\n\nPlease enter your name:");
+        System.out.println("\nPlease enter your name:");
         boolean validName = false;
         String humanPlayerName = sc.nextLine();
         while (!validName) {
@@ -262,10 +262,8 @@ public class HumanVsBot extends Game {
                 this.bot.setPlayerTurn(this.attackOpponent(guessX, guessY, this.bot, this.playgroundPlayer1)); //attacks
                 if (this.bot.getPlayerTurn()) {
                     this.playgroundPlayer1.checkShipHitPoints(guessX, guessY, this.bot);
-                    shipDestroyedWithPreviousMove = this.playgroundPlayer1.isShipDestroyed();
+                    shipDestroyedWithPreviousMove = this.playgroundPlayer1.isShipDestroyed(); //if true = remains true until another successful which damages another ship
                     this.bot.addSuccessfulMoves(botInput);
-                } else {
-                    shipDestroyedWithPreviousMove = this.playgroundPlayer1.isShipDestroyed();
                 }
                 this.renderer.render();
                 //this.bot.setPlayerTurn(true); //TODO delete if Bot check is finished
@@ -616,6 +614,16 @@ public class HumanVsBot extends Game {
 
     public ArrayList<String> getMovesPlayer2() {
         return movesPlayer2;
+    }
+
+    @Override
+    public Playground getPlaygroundPlayer1() {
+        return playgroundPlayer1;
+    }
+
+    @Override
+    public Playground getPlaygroundPlayer2() {
+        return playgroundPlayer2;
     }
 
     @Override

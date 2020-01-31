@@ -18,12 +18,13 @@ public class Main {
             if (input.equals("1")) {
                 HumanVsBot humanVsBot = new HumanVsBot();
                 humanVsBot.play();
+                validInput = true;
             } else if (input.equals("2")) {
                 BotVsBot botVsBot = new BotVsBot();
                 botVsBot.play();
+                validInput = true;
             } else {
                 System.out.println("Invalid input, '1' for fight against bot or '2' for bot fight.");
-                validInput = true;
             }
         }
     }

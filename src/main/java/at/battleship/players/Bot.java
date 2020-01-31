@@ -1,5 +1,7 @@
 package at.battleship.players;
 
+import at.battleship.components.Field;
+import at.battleship.components.Playground;
 import at.battleship.game.Game;
 
 import java.util.ArrayList;
@@ -38,13 +40,9 @@ public class Bot extends Player {
             if (this.successfulMoves.size() >= 2) {
                 int indexTop = this.successfulMoves.size() - 1;
                 int indexBelowTop = this.successfulMoves.size() - 2;
-                if (this.successfulMoves.get(indexTop).charAt(0) == this.successfulMoves.get(indexBelowTop).charAt(0) &&
-                        (Integer.parseInt(this.successfulMoves.get(indexTop).substring(1)) - Integer.parseInt(this.successfulMoves.get(indexBelowTop).substring(1))) < 2 &&
-                        (Integer.parseInt(this.successfulMoves.get(indexTop).substring(1)) - Integer.parseInt(this.successfulMoves.get(indexBelowTop).substring(1))) > -2) {
+                if (this.successfulMoves.get(indexTop).charAt(0) == this.successfulMoves.get(indexBelowTop).charAt(0)) {
                     potentialX = this.successfulMoves.get(indexTop).charAt(0);
-                } else if (this.successfulMoves.get(indexTop).substring(1).equals(this.successfulMoves.get(indexBelowTop).substring(1)) &&
-                        ((int) this.successfulMoves.get(indexTop).charAt(0) - (int) this.successfulMoves.get(indexBelowTop).charAt(0)) < 2 &&
-                        ((int) this.successfulMoves.get(indexTop).charAt(0) - (int) this.successfulMoves.get(indexBelowTop).charAt(0)) > -2) {
+                } else if (this.successfulMoves.get(indexTop).substring(1).equals(this.successfulMoves.get(indexBelowTop).substring(1))) {
                     potentialY = this.successfulMoves.get(indexTop).substring(1);
                 } else { //else just use a field neighbour of the last successful guess for the next move
                     ArrayList<String> lastSuccessfulMove = new ArrayList<>();
@@ -63,6 +61,12 @@ public class Bot extends Player {
                         .filter(e -> (Integer.parseInt(e.substring(1)) - Integer.parseInt(lastSuccessfulMove.substring(1))) < 5 &&
                                 (Integer.parseInt(e.substring(1)) - Integer.parseInt(lastSuccessfulMove.substring(1))) > -5)
                         .collect(Collectors.toList());
+
+                //removes all potential moves which are separated by fieldRenderState.MISS
+//                if (potentialMoves.size() >= 2) {
+//                    potentialMoves = this.checkFieldRenderStateNextTo(potentialMoves, true);
+//                }
+
             } else if (potentialY.length() > 0) {
                 String lastSuccessfulMove = this.successfulMoves.get(this.successfulMoves.size() - 1);
                 String finalPotentialY = potentialY;
@@ -72,41 +76,46 @@ public class Bot extends Player {
                         .filter(e -> ((int) e.charAt(0) - (int) lastSuccessfulMove.charAt(0)) < 5 &&
                                 ((int) e.charAt(0) - (int) lastSuccessfulMove.charAt(0)) > -5)
                         .collect(Collectors.toList());
+
+                //removes all potential moves which are separated by fieldRenderState.MISS
+//                if (potentialMoves.size() >= 2) {
+//                    potentialMoves = this.checkFieldRenderStateNextTo(potentialMoves, false);
+//                }
             }
 
 
             //if no logical move is available or the last four moves were unsuccessful and the bot has already moved at least 40 times -> go for the fields with the most potential field neighbours
             if (this.movesTally < 40) {
                 if (potentialMoves.size() == 0 || this.successfulMoves.size() >= 5 && !this.checkLastFourMoves(this.successfulMoves)) {
-                    int [] nextMoves = this.getRandomNumber(this.fieldsAvailableForBot);
+                    int[] nextMoves = this.getRandomNumber(this.fieldsAvailableForBot);
                     xNextMove = nextMoves[0];
                     yNextMove = nextMoves[1];
                 } else {
-                    int [] nextMoves = this.getRandomNumber(potentialMoves);
+                    int[] nextMoves = this.getRandomNumber(potentialMoves);
                     xNextMove = nextMoves[0];
                     yNextMove = nextMoves[1];
                 }
 
-            //if no logical move is available or the last four moves were unsuccessful and the bot has not yet moved 40 times -> go for random move
+                //if no logical move is available or the last four moves were unsuccessful and the bot has not yet moved 40 times -> go for random move
             } else {
                 if (potentialMoves.size() == 0 || this.successfulMoves.size() >= 5 && !this.checkLastFourMoves(this.successfulMoves)) {
-                    int [] nextMoves = this.getRandomNumberOfFieldsWithTheMostPotentialNeighbours();
+                    int[] nextMoves = this.getRandomNumberOfFieldsWithTheMostPotentialNeighbours();
                     xNextMove = nextMoves[0];
                     yNextMove = nextMoves[1];
                 } else {
-                    int [] nextMoves = this.getRandomNumber(potentialMoves);
+                    int[] nextMoves = this.getRandomNumber(potentialMoves);
                     xNextMove = nextMoves[0];
                     yNextMove = nextMoves[1];
                 }
             }
 
-        //if a ship has been destroyed with the previous move: either go for complete random move (if movesTally < 40) or go for random move of the fields with the most potential field neighbours
+            //if a ship has been destroyed with the previous move: either go for complete random move (if movesTally < 40) or go for random move of the fields with the most potential field neighbours
         } else if (this.movesTally < 40) {
-            int [] nextMoves = this.getRandomNumber(this.fieldsAvailableForBot);
+            int[] nextMoves = this.getRandomNumber(this.fieldsAvailableForBot);
             xNextMove = nextMoves[0];
             yNextMove = nextMoves[1];
         } else {
-            int [] nextMoves = this.getRandomNumberOfFieldsWithTheMostPotentialNeighbours();
+            int[] nextMoves = this.getRandomNumberOfFieldsWithTheMostPotentialNeighbours();
             xNextMove = nextMoves[0];
             yNextMove = nextMoves[1];
         }
@@ -216,8 +225,8 @@ public class Bot extends Player {
                 }
             }
         } else if (this.equals(this.game.getPlayer2())) {
-            for (int i = this.game.getMovesPlayer1().size() - 1; i > this.game.getMovesPlayer1().size() - 5; i--) {
-                if (successfulMoves.contains(this.game.getMovesPlayer1().get(i))) {
+            for (int i = this.game.getMovesPlayer2().size() - 1; i > this.game.getMovesPlayer2().size() - 5; i--) {
+                if (successfulMoves.contains(this.game.getMovesPlayer2().get(i))) {
                     lastFourMovesSuccessful = true;
                     break;
                 }
@@ -236,6 +245,93 @@ public class Bot extends Player {
             }
         }
         return allFields;
+    }
+
+
+    private ArrayList<String> checkFieldRenderStateNextTo(ArrayList<String> potentialMoves, boolean isX) {
+        ArrayList<String> viableMoves = (ArrayList<String>) potentialMoves.stream()
+                .sorted(Comparator.naturalOrder())
+                .collect(Collectors.toList());
+
+        char xViableMove;
+        String yViableMove;
+
+        char xNonViableMove;
+        String yNonViableMove;
+
+        if (this.equals(game.getPlayer1())) {
+            if (isX) {
+                for (int i = 0; i < potentialMoves.size() - 1; i++) {
+                    int x = this.game.transformStringInputToXValue(potentialMoves.get(i).charAt(0));
+                    int y = this.game.transformStringInputToYValue(potentialMoves.get(i).substring(1));
+
+                    if (this.game.getPlaygroundPlayer2().getMap()[x][y + 1].getFieldRenderState() == Field.CurrentState.MISS) {
+                        xNonViableMove = this.game.transformNumericInputOfXToCharValue(x);
+                        yNonViableMove = this.game.transformNumericInputOfYToStringValue(y + 1);
+                        viableMoves.remove(xNonViableMove + yNonViableMove);
+                        i--;
+                    } else {
+                        xViableMove = this.game.transformNumericInputOfXToCharValue(x);
+                        yViableMove = this.game.transformNumericInputOfYToStringValue(y + 1);
+                        viableMoves.add(xViableMove + yViableMove);
+                    }
+                }
+
+            } else {
+                for (int i = 0; i < potentialMoves.size() - 1; i++) {
+                    int x = this.game.transformStringInputToXValue(potentialMoves.get(i).charAt(0));
+                    int y = this.game.transformStringInputToYValue(potentialMoves.get(i).substring(1));
+
+                    if (this.game.getPlaygroundPlayer2().getMap()[x + 1][y].getFieldRenderState() == Field.CurrentState.MISS) {
+                        xNonViableMove = this.game.transformNumericInputOfXToCharValue(x + 1);
+                        yNonViableMove = this.game.transformNumericInputOfYToStringValue(y);
+                        viableMoves.remove(xNonViableMove + yNonViableMove);
+                        i--;
+                    } else {
+                        xViableMove = this.game.transformNumericInputOfXToCharValue(x + 1);
+                        yViableMove = this.game.transformNumericInputOfYToStringValue(y);
+                        viableMoves.add(xViableMove + yViableMove);
+                    }
+                }
+            }
+
+        } else {
+            if (isX) {
+                for (int i = 0; i < potentialMoves.size() - 1; i++) {
+                    int x = this.game.transformStringInputToXValue(potentialMoves.get(i).charAt(0));
+                    int y = this.game.transformStringInputToYValue(potentialMoves.get(i).substring(1));
+
+                    if (this.game.getPlaygroundPlayer1().getMap()[x][y + 1].getFieldRenderState() == Field.CurrentState.MISS) {
+                        xNonViableMove = this.game.transformNumericInputOfXToCharValue(x);
+                        yNonViableMove = this.game.transformNumericInputOfYToStringValue(y + 1);
+                        viableMoves.remove(xNonViableMove + yNonViableMove);
+                        i--;
+                    } else {
+                        xViableMove = this.game.transformNumericInputOfXToCharValue(x);
+                        yViableMove = this.game.transformNumericInputOfYToStringValue(y + 1);
+                        viableMoves.add(xViableMove + yViableMove);
+                    }
+                }
+
+            } else {
+                for (int i = 0; i < potentialMoves.size() - 1; i++) {
+                    int x = this.game.transformStringInputToXValue(potentialMoves.get(i).charAt(0));
+                    int y = this.game.transformStringInputToYValue(potentialMoves.get(i).substring(1));
+
+                    if (this.game.getPlaygroundPlayer1().getMap()[x + 1][y].getFieldRenderState() == Field.CurrentState.MISS) {
+                        xNonViableMove = this.game.transformNumericInputOfXToCharValue(x + 1);
+                        yNonViableMove = this.game.transformNumericInputOfYToStringValue(y);
+                        viableMoves.remove(xNonViableMove + yNonViableMove);
+                        i--;
+                    } else {
+                        xViableMove = this.game.transformNumericInputOfXToCharValue(x + 1);
+                        yViableMove = this.game.transformNumericInputOfYToStringValue(y);
+                        viableMoves.add(xViableMove + yViableMove);
+                    }
+                }
+            }
+        }
+        return viableMoves;
     }
 
 

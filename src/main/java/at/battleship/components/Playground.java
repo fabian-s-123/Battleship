@@ -46,6 +46,7 @@ public class Playground {
             if (ship.getValueBetweenX(ship).length != 0) {
                 if (Arrays.stream(ship.getValueBetweenX(ship)).anyMatch(e -> e == x) && ship.getStartRangeY() == y) {
                     ship.reduceHitPoints();
+
                     if (ship.getHitPoints() == 0) {
                         if (this.player.equals(opponent)) {
                             System.out.println("Enemy " + ship.toString() + " has been destroyed.");

@@ -1,5 +1,6 @@
 package at.battleship.game;
 
+import at.battleship.components.Playground;
 import at.battleship.players.Player;
 
 import java.util.ArrayList;
@@ -18,6 +19,10 @@ public abstract  class Game {
     public abstract ArrayList<String> getMovesPlayer2();
 
     public abstract ArrayList<String> getMovesPlayer1();
+
+    public abstract Playground getPlaygroundPlayer1();
+
+    public abstract Playground getPlaygroundPlayer2();
 
     public abstract Player getPlayer1();
 

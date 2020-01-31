@@ -129,8 +129,6 @@ public class BotVsBot extends Game {
                     this.playgroundPlayer2.checkShipHitPoints(guessX, guessY, this.bot1);
                     shipDestroyedWithPreviousMove = this.playgroundPlayer2.isShipDestroyed();
                     this.bot1.addSuccessfulMoves(botInput);
-                } else {
-                    shipDestroyedWithPreviousMove = this.playgroundPlayer1.isShipDestroyed();
                 }
                 this.renderer.render();
                 if (this.bot1.getCurrentScore() == this.playgroundPlayer1.checkMaxShipHitPointsCombined()) {
@@ -181,8 +179,6 @@ public class BotVsBot extends Game {
                     this.playgroundPlayer1.checkShipHitPoints(guessX, guessY, this.bot2);
                     shipDestroyedWithPreviousMove = this.playgroundPlayer1.isShipDestroyed();
                     this.bot2.addSuccessfulMoves(botInput);
-                } else {
-                    shipDestroyedWithPreviousMove = this.playgroundPlayer2.isShipDestroyed();
                 }
                 this.renderer.render();
                 if (this.bot2.getCurrentScore() == this.playgroundPlayer2.checkMaxShipHitPointsCombined()) {
@@ -367,6 +363,16 @@ public class BotVsBot extends Game {
 
     public ArrayList<String> getMovesPlayer2() {
         return movesPlayer2;
+    }
+
+    @Override
+    public Playground getPlaygroundPlayer1() {
+        return playgroundPlayer1;
+    }
+
+    @Override
+    public Playground getPlaygroundPlayer2() {
+        return playgroundPlayer2;
     }
 
     @Override
