@@ -1,10 +1,8 @@
 package at.battleship.players;
 
-import at.battleship.components.Ship;
 import at.battleship.game.Game;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Comparator;
 import java.util.stream.Collectors;
 
@@ -13,8 +11,6 @@ public class Bot extends Player {
     private Game game;
     private ArrayList<String> fieldsAvailableForBot;
     private ArrayList<String> successfulMoves = new ArrayList<>();
-    private ArrayList<Ship> enemyShips = new ArrayList<Ship>();
-
 
     public Bot(String name, boolean playerTurn, boolean isVisible, int currentScore, Game game) {
         super(name, playerTurn, isVisible, currentScore);
@@ -166,34 +162,6 @@ public class Bot extends Player {
         return potentialNextMoves;
     }
 
-//    private boolean checkForDamagedShip() {
-//        return this.game.getPlaygroundPlayer1().getDamagedShip().length > 0;
-//    }
-//
-//    private String[] getDamagedShip() {
-//        int[] damageShip = this.game.getPlaygroundPlayer1().getDamagedShip();
-//        String[] damagedShipFields = new String[0];
-//        char x;
-//        String y;
-//        if (damageShip.length > 0) {
-//            damagedShipFields = new String[damageShip.length - 2];
-//            if (damageShip[0] == 0) {
-//                for (int i = 2; i <= damageShip.length - 1; i++) {
-//                    x = this.game.transformNumericInputOfXToCharValue(damageShip[i]);
-//                    y = this.game.transformNumericInputOfYToStringValue(damageShip[1]);
-//                    damagedShipFields[i - 2] = x + y;
-//                }
-//            } else {
-//                for (int i = 2; i <= damageShip.length - 1; i++) {
-//                    x = this.game.transformNumericInputOfXToCharValue(damageShip[1]);
-//                    y = this.game.transformNumericInputOfYToStringValue(damageShip[i]);
-//                    damagedShipFields[i - 2] = x + y;
-//                }
-//            }
-//        }
-//        return damagedShipFields;
-//    }
-
     private ArrayList<String> getFieldNeighbours(String field) {
         ArrayList<String> fieldNeighbours = new ArrayList<>();
         int xField = this.game.transformStringInputToXValue(field.charAt(0));
@@ -240,10 +208,19 @@ public class Bot extends Player {
 
     private boolean checkLastFourMoves(ArrayList<String> successfulMoves) {
         boolean lastFourMovesSuccessful = false;
-        for (int i = this.game.getMovesPlayer2().size() - 1; i > this.game.getMovesPlayer2().size() - 5; i--) {
-            if (successfulMoves.contains(this.game.getMovesPlayer2().get(i))) {
-                lastFourMovesSuccessful = true;
-                break;
+        if (this.equals(this.game.getPlayer1())) {
+            for (int i = this.game.getMovesPlayer1().size() - 1; i > this.game.getMovesPlayer1().size() - 5; i--) {
+                if (successfulMoves.contains(this.game.getMovesPlayer1().get(i))) {
+                    lastFourMovesSuccessful = true;
+                    break;
+                }
+            }
+        } else if (this.equals(this.game.getPlayer2())) {
+            for (int i = this.game.getMovesPlayer1().size() - 1; i > this.game.getMovesPlayer1().size() - 5; i--) {
+                if (successfulMoves.contains(this.game.getMovesPlayer1().get(i))) {
+                    lastFourMovesSuccessful = true;
+                    break;
+                }
             }
         }
         return lastFourMovesSuccessful;
