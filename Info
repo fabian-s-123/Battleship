@@ -1,0 +1,18 @@
+Aufgabenstellung ist ersichtlich im file battleship.pdf
+
+Contributor: ich
+
+Aufbau: Component Playground besteht aus einem zweidimensionalen Array. Jede Koordinate entspricht jeweils einem Field
+        Das Ship selbst 
+        
+        die Klassen HumanPlayer & Bot leiten jeweils von der Abstrakten Klasse Player ab; gleichermaßen wie beiden Spielweisen HumanVsBot
+        & BotVsBot von der Abstrakten Klasse Game ableiten, in denen die jeweilige Spiellogik dann auch implementiert ist
+        
+        Die Regeln sind etwa dieselben wie im echten Schiffeversenken; der Ablauf ist immer derselbe: zuerst wird das Spielfeld mit den
+        vorhandenen Schiffen besetzt (https://github.com/fabian-s-123/Battleship/blob/694c9b6b45bff6e1c087b9dea263f09628b0c6c4/src/main/java/at/battleship/game/HumanVsBot.java#L102)
+        und dann werden die Runden gespielt
+        
+
+Notiz:  Der Fokus habe ich hier auf das Erstellen eines halbwegs intelligenten Bots gelegt, weshalb ich auch den Spielmodus BotVsBot 
+        implementiert habe um zu überprüfen ob dieser annähernd an einen menschlichen Gegner herankommt (tatsächlich habe ich in den Test 
+        gegen den Bot auch schon verloren).
